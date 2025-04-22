@@ -10,9 +10,8 @@ try:
     # Adjust import path if your directory/file names are different
     from comms.gcode_handler import GCodeHandler, COMMANDS, BASE_HTTP_URL, WS_URL
     from hardware_modules.pump import Pump
-    # Import other device classes if needed for more complex tests
     # from hardware_modules.robot import Robot
-    # from hardware_modules.sonicator import Sonicator
+    from hardware_modules.sonicator import Sonicator
 except ImportError as e:
     print(f"Import Error: {e}")
     print("Ensure you are running this script from the project root directory")

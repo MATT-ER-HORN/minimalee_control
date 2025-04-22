@@ -53,9 +53,6 @@ class Sonicator:
             print(f"  Dwelling for {sonicate_sec} seconds...")
             # Assumes "dwell" (G4 P...) exists in COMMANDS and has wait_after=True
             success = self.comms.send_command("dwell", duration_ms=duration_ms)
-
-        # Always try to turn the fan off, even if dwell failed? Or only if dwell succeeded?
-        # Let's try turning it off regardless, but the overall success depends on all steps.
         print("  Turning sonicator OFF...")
         off_success = self.comms.send_command("fan_off") # Assumes "fan_off" (M107) exists in COMMANDS
         if not off_success:
