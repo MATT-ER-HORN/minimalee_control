@@ -6,7 +6,7 @@ import os
 # --- Import Core Classes ---
 try:
     # Adjust path based on actual structure if it differs
-    from comms.gcode_handler import GCodeHandler, COMMANDS, BASE_HTTP_URL, WS_URL
+    from comms.wifi_handler import GCodeHandler, COMMANDS, BASE_HTTP_URL, WS_URL
     from hardware_modules.robot import Robot
     # LocationManager is no longer needed here
     # from hardware_modules.pump import Pump # Import if needed

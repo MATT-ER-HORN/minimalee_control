@@ -1,68 +1,56 @@
 import time
-from comms.gcode_handler import GCodeHandler
+from comms.wifi_handler import WifiHandler
+from comms.serial_handler import SerialHandler
 
 class Sonicator:
-    """Turn the sonicator on for set times using the fan control gcode and a relay"""
+    """Control the sonicator using the fan control G-code (Simplified)."""
 
-    def __init__(self, comms: GCodeHandler):
+    # Simplified __init__ - removed type hint and check
+    def __init__(self, comms):
         """
-        Initializes the sonicator control.
+        Initializes the Sonicator control.
 
         Args:
-            comms:  (GCodeHandler):  is how commands are parsed and sent to mainboard using the the gcode handler from this project which deals with creating gcode text and sending it.
+            comms (WifiHandler | SerialHandler): The handler instance for sending commands.
         """
-        if not isinstance(comms, GCodeHandler):
-             raise TypeError("Communicator must be an instance of GCodeHandler")
-        
         self.comms = comms
-        print("Sonicator initialized.")
-    
-    def sonicate_duration (self, sonicate_sec = float) -> bool:
+        # Removed print statement
+
+    # Renamed method, removed checks
+    def run_for_duration(self, duration_s: float) -> bool:
         """
-        Turns the sonicator (mainboard fan output) on for a specific duration.
+        Turns the sonicator (fan output) on for a specific duration.
 
         Args:
-            sonicate_sec (float): The duration to run the sonicator in seconds. Must be positive.
+            duration_s (float): The duration to run the sonicator in seconds.
 
         Returns:
-            bool: True if all steps completed successfully, False otherwise.
+            bool: True if commands were sent successfully (minimal check).
         """
-        print(f"\n[{time.strftime('%H:%M:%S')}] Running sonicator for: {sonicate_sec} s")
+        # Calculate milliseconds, assuming duration_s is valid
+        duration_ms = int(duration_s * 1000)
 
-        # check input
-        if not isinstance(sonicate_sec, (int, float)) or sonicate_sec <= 0:
-            print("Error: Sonicator duration must be a positive number.")
-            return False
-
-        # Convert duration to milliseconds for G4 command
-        duration_ms = int(sonicate_sec * 1000)
-        if duration_ms <= 0:
-             print("Error: Calculated duration in milliseconds is not positive.")
-             return False
-
-        print(f"  Calculated wait (gcode G04 dwell): {duration_ms} ms")
-
-        # Send sequence of sequence of GCode commands to control board
-        # command sequence: Fan on (M106 S255) -> Dwell (G04 P<milliseconds>)-> Fan off (M106 S0)
-        success = True
+        # Send Command Sequence (minimal success checking)
+        print(f"\n[{time.strftime('%H:%M:%S')}] Running sonicator for: {duration_s} s")
         print("  Turning sonicator ON...")
-        if success:
-            success = self.comms.send_command("fan_on") # Assumes "fan_on" (M106 S255) exists in COMMANDS
+        if not self.comms.send_command("fan_on"):
+            print("Error sending fan_on command.")
+            return False # Exit early on failure
 
-        if success:
-            print(f"  Dwelling for {sonicate_sec} seconds...")
-            # Assumes "dwell" (G4 P...) exists in COMMANDS and has wait_after=True
-            success = self.comms.send_command("dwell", duration_ms=duration_ms)
+        print(f"  Dwelling for {duration_s} seconds...")
+        if not self.comms.send_command("dwell", duration_ms=duration_ms):
+            print("Error sending dwell command (or wait failed).")
+            # Attempt to turn off fan even if dwell failed
+            print("  Attempting to turn sonicator OFF after dwell failure...")
+            self.comms.send_command("fan_off")
+            return False # Return False as dwell failed
+
         print("  Turning sonicator OFF...")
-        off_success = self.comms.send_command("fan_off") # Assumes "fan_off" (M107) exists in COMMANDS
-        if not off_success:
-             print("Warning: Failed to send fan_off command.")
-             # Consider if this should make the overall function fail
-             # success = False # Uncomment if fan_off failure should mean overall failure
+        if not self.comms.send_command("fan_off"):
+            print("Warning: Failed to send fan_off command, but dwell completed.")
+            # Return True because the main action (dwell) seemed to succeed
+            # Change to False if fan_off failure is critical
+            return True
 
-        print(f"[{time.strftime('%H:%M:%S')}] Sonicator run finished. Overall Success: {success}")
-        # Return True only if Fan On and Dwell succeeded. Fan Off failure is just a warning for now.
-        return success
-
-
-        
+        print(f"[{time.strftime('%H:%M:%S')}] Sonicator run finished.")
+        return True

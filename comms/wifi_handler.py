@@ -5,96 +5,44 @@ import websocket # Requires pip install websocket-client
 import threading
 import queue
 import re
+from .commands import COMMANDS
 
-# --- Configuration ---
+
+
+# --- Configuration (Consider moving to config file loading in Main.py) ---
+# These are kept here for now based on the provided code, but loading
+# them from config.ini in Main.py and passing them to __init__ is better practice.
 ESP3D_IP = "192.168.0.1"
 ESP3D_HTTP_PORT = 80
-ESP3D_WS_PORT = 81 # As identified by user
+ESP3D_WS_PORT = 81 # Websocket port for ESP3D
 HTTP_TIMEOUT = 15 # Timeout for sending command via HTTP
 WAIT_TIMEOUT = 120 # Max time to wait for command completion
-POLL_INTERVAL = 0.1 # Short sleep in wait loops if needed (though queue.get blocks)
+# POLL_INTERVAL not used in this handler version
 
-# Construct base URLs
+# Construct base URLs (can also be passed in __init__)
 BASE_HTTP_URL = f"http://{ESP3D_IP}:{ESP3D_HTTP_PORT}"
 WS_URL = f"ws://{ESP3D_IP}:{ESP3D_WS_PORT}/"
 COMMAND_ENDPOINT = "/command"
 
-# --- Command Dictionary ---
-# wait_after determines IF waiting occurs
-# send_m400_before_wait determines IF M400 is sent before that wait
-COMMANDS = {
-    # Movement & Setup
-    "home_all": {
-        "gcode": "G28", "desc": "Home all axes", "params": [],
-        "wait_after": True, # Yes, wait
-        "send_m400_before_wait": False # No M400 needed
-    },
-    "get_position": {
-        "gcode": "M114", "desc": "Report current position", "params": [],
-        "wait_after": False, # Let position report come via WS normally
-    },
-    "move": {
-        "gcode_base": "G1", "desc": "Move to specified coordinates (X, Y, Z) at optional speed (F)",
-        "params": ["X", "Y", "Z", "F"],
-        "wait_after": True, # Yes, wait
-        "send_m400_before_wait": True # Yes, send M400 first
-    },
-    "set_absolute": {
-        "gcode": "G90", "desc": "Set positioning to absolute coordinates", "params": [],
-        "wait_after": False
-    },
-    "set_relative": {
-        "gcode": "G91", "desc": "Set positioning to relative coordinates", "params": [],
-        "wait_after": False
-    },
-    "wait_finish": { # The M400 command itself
-        "gcode": "M400", "desc": "Wait for all moves in planner queue to finish", "params": [],
-        "wait_after": False
-    },
-    # Pump (Extruder) Commands
-    "set_extruder_relative": {
-        "gcode": "M83", "desc": "Set extruder to relative mode", "params": [],
-        "wait_after": False
-    },
-    "set_extruder_absolute": {
-        "gcode": "M82", "desc": "Set extruder to absolute mode", "params": [],
-        "wait_after": False
-    },
-    "pump_move": { # Internal command used by run_pump method
-        "gcode_base": "G1", "desc": "Move extruder (pump)",
-        "params": ["E", "F"],
-        "wait_after": True, # Yes, wait
-        "send_m400_before_wait": True # Yes, send M400 first
-    },
-    # Sonicator (Fan) Commands
-    "fan_on": {
-        "gcode": "M106 S255", "desc": "Turn fan ON (full speed)", "params": [],
-        "wait_after": False
-    },
-    "fan_off": {
-        "gcode": "M107", "desc": "Turn fan OFF", "params": [],
-        "wait_after": False
-    },
-    "dwell": {
-        "gcode": "G4 P{duration_ms}", "desc": "Pause for specified milliseconds",
-        "params": ["duration_ms"],
-        "wait_after": True, # Yes, wait
-        "send_m400_before_wait": False # No M400 needed
-    },
-}
 
-# Renamed class
-class GCodeHandler:
+class WifiHandler: # Renamed class as per user's code
     """
-    Manages communication with a G-code interpreter (currently ESP3D)
+    Manages communication with an ESP3D device over WiFi
     using HTTP for sending commands and WebSocket for receiving responses.
-    Uses command-specific wait logic.
+    Uses command-specific wait logic defined in the passed commands_dict.
     """
     def __init__(self, http_url, ws_url, commands_dict):
-        """Initializes the GCodeHandler."""
+        """
+        Initializes the WifiHandler (ESP3D specific).
+
+        Args:
+            http_url (str): The base URL for HTTP commands (e.g., "http://192.168.0.1:80").
+            ws_url (str): The URL for the WebSocket connection (e.g., "ws://192.168.0.1:81/").
+            commands_dict (dict): The dictionary defining known G-code commands and wait behavior.
+        """
         self.http_url = http_url
         self.ws_url = ws_url if ws_url.startswith("ws://") else f"ws://{ws_url}"
-        self.commands = commands_dict
+        self.commands = commands_dict # Store the passed-in commands dictionary
         self.ws = None
         self.ws_thread = None
         self.ws_stop_event = threading.Event()
@@ -107,8 +55,8 @@ class GCodeHandler:
         """Establishes the WebSocket connection and starts receiver thread."""
         if self.is_connected: return True
         try:
-            # Log updated to reflect generic name but specific protocol for now
-            print(f"Connecting to WebSocket at {self.ws_url} using 'arduino' subprotocol (for ESP3D)...")
+            # Log updated to reflect specific handler type
+            print(f"Connecting to ESP3D WebSocket at {self.ws_url} using 'arduino' subprotocol...")
             self.ws = websocket.create_connection(
                 self.ws_url, timeout=10, subprotocols=["arduino"]
             )
@@ -172,11 +120,13 @@ class GCodeHandler:
 
     def _send_http_command(self, gcode_command):
         """Sends a G-code command via HTTP GET (ESP3D specific implementation)."""
+        # Use self.http_url stored during initialization
         full_url = self.http_url + COMMAND_ENDPOINT
         params = {'commandText': gcode_command}
         print(f"  [{time.strftime('%H:%M:%S')}] Sending HTTP GET: '{gcode_command}'")
         start_time = time.time()
         try:
+            # Use HTTP_TIMEOUT constant defined globally (or pass as arg)
             response = requests.get(full_url, params=params, timeout=HTTP_TIMEOUT)
             end_time = time.time()
             print(f"  [{time.strftime('%H:%M:%S')}] HTTP request completed in {end_time - start_time:.2f}s (Status: {response.status_code})")
@@ -218,28 +168,15 @@ class GCodeHandler:
             try:
                 message = self.message_queue.get(timeout=1.0)
                 print(f"    [WS Wait DelayOK] Received: '{message}'")
-                if message.lower() == 'ok': # Check if message IS 'ok' (case-insensitive)
+                is_ok = message.lower() == 'ok'
+                is_ok_suffix = not is_ok and message.lower().endswith('ok') # Check suffix only if not exactly 'ok'
+                if is_ok or is_ok_suffix:
                     time_elapsed = time.time() - start_wait_time
-                    if time_elapsed < ignore_premature_ok_window:
-                        print(f"    [WS Wait DelayOK] Ignoring potentially premature 'ok' received after {time_elapsed:.2f}s.")
-                        continue
-                    else:
-                        print(f"  [{time.strftime('%H:%M:%S')}] Delayed 'ok' received after {time_elapsed:.2f}s.")
-                        return True
-                elif message.lower().endswith('ok'): # Also handle bundled 'ok' suffix
-                     time_elapsed = time.time() - start_wait_time
-                     if time_elapsed < ignore_premature_ok_window:
-                         print(f"    [WS Wait DelayOK] Ignoring potentially premature 'ok' suffix received after {time_elapsed:.2f}s.")
-                         continue
-                     else:
-                         print(f"  [{time.strftime('%H:%M:%S')}] Delayed 'ok' suffix received after {time_elapsed:.2f}s.")
-                         return True
-
-                if message.startswith("PING:") or message.startswith("echo:busy") or message.startswith("ACTIVE_ID:"):
-                    continue
+                    if time_elapsed < ignore_premature_ok_window: print(f"    [WS Wait DelayOK] Ignoring potentially premature 'ok' received after {time_elapsed:.2f}s."); continue
+                    else: print(f"  [{time.strftime('%H:%M:%S')}] Delayed 'ok' received after {time_elapsed:.2f}s."); return True
+                if message.startswith("PING:") or message.startswith("echo:busy") or message.startswith("ACTIVE_ID:"): continue
             except queue.Empty:
-                 if not self.is_connected or (self.ws_thread and not self.ws_thread.is_alive()):
-                    print("  Error: WebSocket disconnected or thread stopped while waiting."); return False
+                 if not self.is_connected or (self.ws_thread and not self.ws_thread.is_alive()): print("  Error: WebSocket disconnected or thread stopped while waiting."); return False
                  continue
             except Exception as e: print(f"  Error while waiting for WS message: {e}"); return False
         print(f"  [{time.strftime('%H:%M:%S')}] Error: Wait for delayed 'ok' suffix timed out."); return False
@@ -255,11 +192,9 @@ class GCodeHandler:
                 if message.lower() == 'ok': # Check if message IS 'ok'
                     print(f"  [{time.strftime('%H:%M:%S')}] Simple 'ok' received.")
                     return True
-                if message.startswith("PING:") or message.startswith("echo:busy") or message.startswith("ACTIVE_ID:"):
-                    continue
+                if message.startswith("PING:") or message.startswith("echo:busy") or message.startswith("ACTIVE_ID:"): continue
             except queue.Empty:
-                 if not self.is_connected or (self.ws_thread and not self.ws_thread.is_alive()):
-                    print("  Error: WebSocket disconnected or thread stopped while waiting."); return False
+                 if not self.is_connected or (self.ws_thread and not self.ws_thread.is_alive()): print("  Error: WebSocket disconnected or thread stopped while waiting."); return False
                  continue
             except Exception as e: print(f"  Error while waiting for WS message: {e}"); return False
         print(f"  [{time.strftime('%H:%M:%S')}] Error: Wait for simple 'ok' timed out."); return False
@@ -273,6 +208,7 @@ class GCodeHandler:
         """
         if not self.is_connected:
             if not self.connect(): print("Error: Cannot send command, connection failed."); return False
+        # Use self.commands (passed during init) to find command info
         if command_key not in self.commands: print(f"Error: Command key '{command_key}' not found."); return False
 
         cmd_info = self.commands[command_key]
@@ -282,7 +218,7 @@ class GCodeHandler:
 
         print(f"\n[{time.strftime('%H:%M:%S')}] Executing command '{command_key}': {cmd_info.get('desc', 'N/A')}")
 
-        # Format G-code
+        # Format G-code using self.commands
         if "gcode" in cmd_info:
             try: final_gcode = cmd_info["gcode"].format(**kwargs)
             except KeyError as e: print(f"Error: Missing parameter {e} for command '{command_key}'."); return False
@@ -308,6 +244,7 @@ class GCodeHandler:
             if should_send_m400:
                 print(f"  Command requires M400. Clearing queue before sending M400...")
                 self._clear_queue()
+                # Use self.commands to get M400 info
                 m400_cmd_info = self.commands.get("wait_finish")
                 if not m400_cmd_info or "gcode" not in m400_cmd_info: print("Error: 'wait_finish' (M400) not defined."); return False
                 m400_gcode = m400_cmd_info["gcode"]
@@ -318,6 +255,7 @@ class GCodeHandler:
                  print(f"  Command requires waiting, but M400 send is skipped for '{command_key}'.")
 
             # --- Dispatch to correct wait logic ---
+            # Use WAIT_TIMEOUT constant defined globally (or pass as arg)
             if command_key == "home_all":
                 wait_success = self._wait_for_position_report(WAIT_TIMEOUT)
             elif m400_was_sent: # Assumes M400 was sent for moves like G1, pump_move
@@ -339,46 +277,42 @@ class GCodeHandler:
     # Moved to device-specific classes (Pump, Sonicator)
 
 
-# --- Main Execution Block ---
+# --- Main Execution Block (Example for testing handler directly) ---
 if __name__ == "__main__":
-    # Use try/finally to ensure disconnect
-    handler = None # Renamed variable
+    # This block is for testing the handler itself, if needed.
+    # It requires the COMMANDS dictionary to be available.
+    print("--- Testing WifiHandler Directly ---")
+
+    # Use the globally defined URLs/COMMANDS for this test block
+    # In real use, these should come from config and be passed to __init__
+    if not COMMANDS:
+         print("Error: COMMANDS dictionary not loaded/defined. Cannot run test.")
+         sys.exit(1)
+
+    handler = WifiHandler(BASE_HTTP_URL, WS_URL, COMMANDS)
     try:
-        # Instantiate the renamed class
-        handler = GCodeHandler(BASE_HTTP_URL, WS_URL, COMMANDS)
         if handler.connect():
-            print("\n--- Running Test Sequence (Command-Specific Wait Logic v2) ---")
+            print("\n--- Running Handler Test Sequence ---")
 
-            # Call methods on the handler instance
-            print("\nTesting 'home_all' (Waits for Position Report)...")
+            print("\nTesting 'home_all'...")
             handler.send_command("home_all")
-
-            print("\nTesting 'get_position' (No Wait)...")
-            handler.send_command("get_position")
             time.sleep(1)
 
-            print("\nTesting 'move' (Sends M400, Waits for Delayed 'ok')...")
+            print("\nTesting 'move'...")
             handler.send_command("set_absolute")
-            if handler.send_command("move", X=50, Y=30, F=3000):
-                 print("Move completed successfully.")
-            else:
-                 print("Move failed.") # Continue testing
+            handler.send_command("move", X=10, Y=10, F=1000)
+            time.sleep(1)
 
-            # NOTE: run_pump and run_sonicator would now be called on
-            # separate Pump and Sonicator instances which are given the handler.
-            # e.g. pump = Pump(handler); pump.run(...)
+            print("\nTesting 'dwell'...")
+            handler.send_command("dwell", duration_ms=2000) # Wait 2 seconds
+            time.sleep(1)
 
-            print("\nTesting final 'move' (Sends M400, Waits for Delayed 'ok')...")
-            handler.send_command("move", X=0, Y=0, F=3000)
-
-            print("\n--- Test Sequence Finished ---")
+            print("\n--- Handler Testing Finished ---")
         else:
-            print("Could not connect to G-code handler. Exiting.")
-
+            print("Failed to connect handler.")
     except KeyboardInterrupt:
-        print("\nKeyboard interrupt detected. Disconnecting...")
+        print("\nKeyboard interrupt.")
     finally:
-        # Ensure disconnect is attempted even if connect failed or handler not fully initialized
         if handler:
-             handler.disconnect()
+            handler.disconnect()
 

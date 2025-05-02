@@ -1,0 +1,82 @@
+2025-05-02 12:33:11 - No prep steps
+2025-05-02 12:33:11 - Executing untitled experiment: 1/2
+2025-05-02 12:33:11 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:33:11 - Executing: deck.robot.move_xy(**{'speed': '5000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:33:16 - Executing untitled experiment: 2/2
+2025-05-02 12:33:16 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:33:16 - Executing: deck.robot.move_xy(**{'speed': '5000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:33:21 - No cleanup steps
+2025-05-02 12:34:26 - No prep steps
+2025-05-02 12:34:26 - Executing untitled experiment: 1/1
+2025-05-02 12:34:26 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:34:26 - Executing: deck.robot.move_xy(**{'speed': '5000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:34:31 - Executing: deck.robot.move_xy(**{'speed': '3000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:34:33 - No cleanup steps
+2025-05-02 12:34:43 - No prep steps
+2025-05-02 12:34:43 - Executing untitled experiment: 1/2
+2025-05-02 12:34:43 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:34:43 - Executing: deck.robot.move_xy(**{'speed': '5000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:34:48 - Executing: deck.robot.move_xy(**{'speed': '3000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:34:50 - Executing untitled experiment: 2/2
+2025-05-02 12:34:50 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:34:51 - Executing: deck.robot.move_xy(**{'speed': '5000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:34:56 - Executing: deck.robot.move_xy(**{'speed': '3000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:34:58 - No cleanup steps
+2025-05-02 12:36:09 - No prep steps
+2025-05-02 12:36:09 - Executing untitled experiment: 1/3
+2025-05-02 12:36:09 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:36:09 - Executing: deck.robot.move_xy(**{'speed': '5000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:36:14 - Executing: deck.robot.move_xy(**{'speed': '3000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:36:15 - Executing untitled experiment: 2/3
+2025-05-02 12:36:15 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:36:17 - Executing: deck.robot.move_xy(**{'speed': '5000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:36:22 - Executing: deck.robot.move_xy(**{'speed': '3000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:36:24 - Executing untitled experiment: 3/3
+2025-05-02 12:36:24 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:36:25 - Executing: deck.robot.move_xy(**{'speed': '5000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:36:30 - Executing: deck.robot.move_xy(**{'speed': '3000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:36:32 - No cleanup steps
+2025-05-02 12:37:54 - No prep steps
+2025-05-02 12:37:54 - Executing untitled experiment: 1/2
+2025-05-02 12:37:54 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:37:54 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:37:59 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:38:01 - Executing untitled experiment: 2/2
+2025-05-02 12:38:01 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:38:02 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:38:07 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:38:09 - No cleanup steps
+2025-05-02 12:42:56 - No prep steps
+2025-05-02 12:42:56 - Executing untitled experiment: 1/1
+2025-05-02 12:42:56 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:42:56 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:43:01 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:43:03 - No cleanup steps
+2025-05-02 12:43:10 - No prep steps
+2025-05-02 12:43:10 - Executing untitled experiment: 1/3
+2025-05-02 12:43:10 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:43:10 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:43:15 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:43:17 - Executing untitled experiment: 2/3
+2025-05-02 12:43:17 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:43:18 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:43:23 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:43:25 - Executing untitled experiment: 3/3
+2025-05-02 12:43:25 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:43:27 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:43:32 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:43:33 - No cleanup steps
+2025-05-02 12:47:32 - No prep steps
+2025-05-02 12:47:32 - Executing untitled experiment: 1/3
+2025-05-02 12:47:32 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:47:32 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:47:37 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:47:39 - Executing untitled experiment: 2/3
+2025-05-02 12:47:39 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:47:41 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:47:46 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:47:47 - Executing untitled experiment: 3/3
+2025-05-02 12:47:47 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 12:47:49 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
+2025-05-02 12:47:54 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
+2025-05-02 12:47:56 - No cleanup steps

@@ -2,7 +2,7 @@
 import time
 import sys
 import os
-from comms.gcode_handler import GCodeHandler, COMMANDS, BASE_HTTP_URL, WS_URL
+from comms.wifi_handler import GCodeHandler, COMMANDS, BASE_HTTP_URL, WS_URL
 from hardware_modules.sonicator import Sonicator
 
 

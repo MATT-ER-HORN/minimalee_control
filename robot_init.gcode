@@ -2,7 +2,7 @@
 ; Sent upon connection by the Python script
 
 ; set StallGuard threshold values for sensorless homing
-M914 X100 Y100 Z0 
+M914 X70 Y70 Z100 
 
 
 ; Steps per unit
@@ -24,8 +24,10 @@ M205 B20000.00 S0.00 T0.00 J0.01
 M206 X0.00 Y0.00 Z0.00
 
 ; Stepper driver current (mA) - Use with caution!
-M906 X550 Y550 Z750
-M906 T0 E550 ; Assuming E is on T0
+M906 X1100 Y1100 Z750
+M906 T0 E750 ; Assuming E is on T0
+
+
 
 ; Driver stepping mode (Example uses S1 = SpreadCycle for X Y Z E) - Check your board/drivers
 M569 S1 X Y Z
