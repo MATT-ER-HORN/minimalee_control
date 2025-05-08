@@ -80,3 +80,35 @@
 2025-05-02 12:47:49 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
 2025-05-02 12:47:54 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
 2025-05-02 12:47:56 - No cleanup steps
+2025-05-02 13:07:41 - No prep steps
+2025-05-02 13:07:41 - Executing untitled experiment: 1/1
+2025-05-02 13:07:41 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 13:07:41 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
+2025-05-02 13:07:41 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
+2025-05-02 13:07:41 - No cleanup steps
+2025-05-02 14:09:49 - No prep steps
+2025-05-02 14:09:49 - Executing untitled experiment: 1/2
+2025-05-02 14:09:49 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 14:09:49 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
+2025-05-02 14:09:54 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
+2025-05-02 14:09:55 - Executing untitled experiment: 2/2
+2025-05-02 14:09:55 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-02 14:09:57 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
+2025-05-02 14:10:02 - Executing: deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})
+2025-05-02 14:10:03 - No cleanup steps
+2025-05-08 14:43:24 - No prep steps
+2025-05-08 14:43:24 - Executing untitled experiment: 1/2
+2025-05-08 14:43:24 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-05-08 14:43:28 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 50.0})
+2025-05-08 14:43:28 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-08 14:43:28 - Executing untitled experiment: 2/2
+2025-05-08 14:43:28 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-05-08 14:43:39 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 50.0})
+2025-05-08 14:43:39 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-08 14:43:44 - No cleanup steps
+2025-05-08 14:44:04 - No prep steps
+2025-05-08 14:44:04 - Executing untitled experiment: 1/1
+2025-05-08 14:44:04 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-05-08 14:44:08 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 50.0})
+2025-05-08 14:44:08 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-08 14:44:08 - No cleanup steps

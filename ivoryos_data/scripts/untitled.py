@@ -3,6 +3,6 @@ import time
 
 
 def untitled():
+	deck.robot.home(**{'axes': 'xyz'})
+	deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 50.0})
 	deck.sonicator.run_for_duration(**{'duration_s': 5.0})
-	deck.robot.move_xy(**{'speed': '7000', 'x': 0.0, 'y': 0.0})
-	deck.robot.move_xy(**{'speed': '7000', 'x': 50.0, 'y': 50.0})

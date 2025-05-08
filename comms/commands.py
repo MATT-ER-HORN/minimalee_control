@@ -11,8 +11,11 @@ COMMANDS = {
         "wait_after": True, "send_m400_before_wait": False
     },
     "get_position": {
-        "gcode": "M114", "desc": "Report current position", "params": [],
-        "wait_after": False # Position comes via WS text normally
+        "gcode": "M114",
+        "desc": "Report current position",
+        "params": [],
+        "wait_after": True, 
+        "send_m400_before_wait": False
     },
     "move": {
         "gcode_base": "G1", "desc": "Move axes",

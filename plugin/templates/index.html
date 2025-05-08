@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Control (Tailwind Utilities)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+<body class="bg-gray-100 font-sans p-4 md:p-8">
+    <div class="max-w-3xl mx-auto bg-gray-50 p-4 rounded-lg">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Robot Control Interface</h1>
+
+        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-6">
+            <h2 class="text-lg font-semibold mb-2 text-gray-700">Status</h2>
+            <div id="status-message" class="mt-1 p-3 bg-gray-100 border border-gray-200 rounded-md min-h-[40px] text-gray-700 text-sm">Connecting...</div>
+            <div id="current-position" class="mt-1 p-3 bg-gray-100 border border-gray-200 rounded-md min-h-[40px] text-gray-700 text-sm mt-2">Position: X:--- Y:--- Z:---</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-6">
+            <div class="flex justify-between items-center mb-4">
+                 <h2 class="text-lg font-semibold text-gray-700">Jog Controls</h2>
+                 <button id="home-btn" class="px-4 py-2 m-1 font-semibold text-white bg-red-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed">Home All</button>
+            </div>
+
+            <div class="flex items-center mb-4 border-b pb-3">
+                <span class="mr-3 font-medium text-sm text-gray-600">Step (mm):</span>
+                <div id="step-buttons" class="flex flex-wrap gap-1">
+                    <button class="px-3 py-1 m-1 text-sm font-medium border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-150 ease-in-out bg-white text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-gray-400" data-step="0.1">0.1</button>
+                    <button class="px-3 py-1 m-1 text-sm font-medium border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-150 ease-in-out bg-white text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-gray-400" data-step="1">1</button>
+                    <button class="px-3 py-1 m-1 text-sm font-medium border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-150 ease-in-out bg-white text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-gray-400" data-step="10">10</button> <button class="px-3 py-1 m-1 text-sm font-medium border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-150 ease-in-out bg-white text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-gray-400" data-step="50">50</button>
+                    <button class="px-3 py-1 m-1 text-sm font-medium border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-150 ease-in-out bg-white text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-gray-400" data-step="100">100</button>
+                </div>
+            </div>
+
+            <div class="flex justify-center items-center gap-4">
+                 <div class="grid grid-cols-3 gap-1 justify-items-center items-center w-48">
+                     <div></div>
+                     <button id="y-plus" class="btn-arrow px-4 py-2 m-1 font-semibold text-white bg-blue-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 flex items-center justify-center text-xl p-1" data-direction="y_plus" title="Y+">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" /></svg>
+                     </button>
+                     <div></div>
+
+                     <button id="x-minus" class="btn-arrow px-4 py-2 m-1 font-semibold text-white bg-blue-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 flex items-center justify-center text-xl p-1" data-direction="x_minus" title="X-">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                     </button>
+                     <div class="w-14 h-14 flex items-center justify-center font-bold text-gray-400 text-lg">XY</div>
+                     <button id="x-plus" class="btn-arrow px-4 py-2 m-1 font-semibold text-white bg-blue-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 flex items-center justify-center text-xl p-1" data-direction="x_plus" title="X+">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                      </button>
+
+                     <div></div>
+                     <button id="y-minus" class="btn-arrow px-4 py-2 m-1 font-semibold text-white bg-blue-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 flex items-center justify-center text-xl p-1" data-direction="y_minus" title="Y-">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                     </button>
+                      <div></div>
+                 </div>
+                 <div class="flex flex-col gap-1 items-center w-16 ml-4">
+                      <div class="font-bold text-gray-400 text-lg mb-1">Z</div>
+                      <button id="z-plus" class="btn-arrow px-4 py-2 m-1 font-semibold text-white bg-blue-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 flex items-center justify-center text-xl p-1 w-full" data-direction="z_plus" title="Z+">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                      </button>
+                      <button id="z-minus" class="btn-arrow px-4 py-2 m-1 font-semibold text-white bg-blue-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 flex items-center justify-center text-xl p-1 w-full" data-direction="z_minus" title="Z-">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                      </button>
+                 </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-6">
+            <h2 class="text-lg font-semibold mb-3 text-gray-700">Save Location</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                <label for="location-name" class="md:col-span-1 font-medium text-sm text-gray-600">Name:</label>
+                <input type="text" id="location-name" placeholder="e.g., home_safe" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm md:col-span-2">
+                <div class="md:col-start-2 md:col-span-2 flex justify-end">
+                     <button id="save-location-btn" class="px-4 py-2 m-1 font-semibold text-white bg-green-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-full md:w-auto">Save Current Position</button>
+                </div>
+            </div>
+        </div>
+
+         <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-6">
+             <h2 class="text-lg font-semibold mb-2 text-gray-700">Saved Locations</h2>
+             {% if locations %}
+                 <ul class="list-disc list-inside bg-gray-50 p-3 rounded border max-h-48 overflow-y-auto">
+                     {# Loop through sorted locations - Jinja comment #}
+                     {% for name, coords in locations.items() | sort %}
+                         <li class="text-sm text-gray-700 mb-1">
+                             <span class="font-medium">{{ name }}:</span>
+                             {# Use .get with default for safety - Jinja comment #}
+                             X:{{ coords.get('x', 'N/A') | round(2) }}
+                             Y:{{ coords.get('y', 'N/A') | round(2) }}
+                             Z:{{ coords.get('z', 'N/A') | round(2) }}
+                         </li>
+                     {% endfor %}
+                 </ul>
+             {% else %}
+                 <p class="text-sm text-gray-500 italic">No locations loaded or available.</p>
+             {% endif %}
+         </div>
+
+    </div>
+
+    <script>
+        // --- Ensure DOM elements exist before assigning ---
+        const statusMessageEl = document.getElementById('status-message');
+        const currentPositionEl = document.getElementById('current-position');
+        const locationNameInput = document.getElementById('location-name');
+        const stepButtonsContainer = document.getElementById('step-buttons');
+        const homeButton = document.getElementById('home-btn'); // Get specific buttons too
+        const saveLocationButton = document.getElementById('save-location-btn');
+
+        let currentJogStep = 10.0; // Default step
+
+        // --- Classes for step buttons ---
+        const stepBtnBaseClasses = ['px-3', 'py-1', 'm-1', 'text-sm', 'font-medium', 'border', 'rounded-md', 'shadow-sm', 'focus:outline-none', 'focus:ring-2', 'focus:ring-indigo-500', 'focus:ring-opacity-75', 'transition', 'duration-150', 'ease-in-out'];
+        const stepBtnInactiveClasses = ['bg-white', 'text-gray-700', 'border-gray-300', 'hover:bg-gray-100', 'hover:border-gray-400'];
+        const stepBtnActiveClasses = ['bg-indigo-700', 'text-white', 'border-indigo-800', 'shadow-lg', 'ring-2', 'ring-offset-1', 'ring-indigo-500', 'font-bold', 'scale-105']; // Added scale-105
+
+        // --- Helper Functions (updateStatus, sendPostRequest) ---
+        // --- Restored function definitions ---
+        function updateStatus(message, isError = false) {
+            if (statusMessageEl) { // Check if element exists
+                console.log("Status:", message);
+                statusMessageEl.textContent = message;
+                statusMessageEl.className = `mt-1 p-3 border rounded-md min-h-[40px] text-sm ${isError ? 'bg-red-100 border-red-200 text-red-700' : 'bg-gray-100 border-gray-200 text-gray-700'}`;
+            } else {
+                console.error("Status message element not found!");
+            }
+        }
+        async function sendPostRequest(url, formData) {
+            try {
+                const response = await fetch(url, { method: 'POST', body: formData });
+                let data;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    data = await response.json();
+                } else {
+                    const textResponse = await response.text();
+                    console.error("Received non-JSON response:", textResponse);
+                    updateStatus(`Server returned non-JSON response (Status: ${response.status}). Check console.`, true);
+                    return false;
+                }
+
+                if (response.ok && data.status === 'ok') {
+                    updateStatus(data.message || `${url} sent successfully.`);
+                    if (data.locations) { window.location.reload(); } // Refresh on save
+                    if (url === '/move' || url === '/home') { setTimeout(fetchPosition, 300); }
+                    return true;
+                } else {
+                    updateStatus(data.message || `Error with ${url}. Status: ${response.status}`, true);
+                    return false;
+                }
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                updateStatus(`Network error or server unavailable: ${error}`, true);
+                return false;
+            }
+        }
+        // --- Update Step Button Styles ---
+        function updateStepButtons() {
+            if (!stepButtonsContainer) { console.error("Step buttons container not found!"); return; }
+            stepButtonsContainer.querySelectorAll('button[data-step]').forEach(btn => {
+                const stepValue = parseFloat(btn.getAttribute('data-step'));
+                btn.className = ''; // Clear existing classes
+                stepBtnBaseClasses.forEach(cls => btn.classList.add(cls)); // Add base classes
+                if (Math.abs(stepValue - currentJogStep) < 1e-6) {
+                    stepBtnActiveClasses.forEach(cls => btn.classList.add(cls));
+                } else {
+                    stepBtnInactiveClasses.forEach(cls => btn.classList.add(cls));
+                }
+            });
+        }
+        // --- End Restored Functions ---
+
+
+        // --- Event Listeners ---
+        function attachListeners() {
+            console.log("Attempting to attach listeners..."); // DEBUG
+
+            const arrowButtons = document.querySelectorAll('.btn-arrow');
+            console.log(`Found ${arrowButtons.length} arrow buttons.`); // DEBUG
+            arrowButtons.forEach(button => {
+                 button.addEventListener('click', () => {
+                     console.log("Arrow button clicked:", button.id); // DEBUG
+                     const direction = button.getAttribute('data-direction');
+                     const step = currentJogStep;
+                     if (!direction) { console.log("No direction found for button:", button.id); return; }
+                     updateStatus(`Sending move: ${direction} by ${step}mm...`);
+                     const formData = new FormData();
+                     formData.append('direction', direction);
+                     formData.append('step', step);
+                     sendPostRequest('/move', formData); // Calls the actual function now
+                 });
+             });
+
+            if (homeButton) {
+                console.log("Attaching listener to Home button."); // DEBUG
+                homeButton.addEventListener('click', () => {
+                     console.log("Home button clicked"); // DEBUG
+                     updateStatus('Sending Home command...');
+                     sendPostRequest('/home', new FormData()); // Calls the actual function now
+                 });
+            } else { console.error("Home button not found!"); }
+
+            if (saveLocationButton) {
+                console.log("Attaching listener to Save Location button."); // DEBUG
+                saveLocationButton.addEventListener('click', () => {
+                     console.log("Save Location button clicked"); // DEBUG
+                     const name = locationNameInput ? locationNameInput.value.trim() : '';
+                     if (!name) { updateStatus('Please enter a location name.', true); return; }
+                     updateStatus(`Saving current location as '${name}'...`);
+                     const formData = new FormData();
+                     formData.append('name', name);
+                     sendPostRequest('/save_location', formData); // Calls the actual function now
+                 });
+            } else { console.error("Save Location button not found!"); }
+
+            if (stepButtonsContainer) {
+                 console.log("Attaching listeners to Step buttons."); // DEBUG
+                 stepButtonsContainer.querySelectorAll('button[data-step]').forEach(button => {
+                     button.addEventListener('click', () => {
+                         currentJogStep = parseFloat(button.getAttribute('data-step'));
+                         console.log("Step button clicked. Selected step:", currentJogStep); // DEBUG
+                         updateStepButtons(); // Calls the actual function now
+                     });
+                 });
+             } else { console.error("Step buttons container not found!"); }
+        }
+
+
+        // --- Position Polling ---
+        let positionInterval;
+        // --- Restored Function ---
+        async function fetchPosition() {
+             if (!currentPositionEl) { console.error("Position display element not found!"); return; }
+             try {
+                 const response = await fetch('/get_position');
+                 let data;
+                 if (!response.ok) {
+                      try { data = await response.json(); updateStatus(data.message || `Error fetching position: ${response.status}`, true); }
+                      catch { updateStatus(`Error fetching position: ${response.status}`, true); }
+                      return;
+                 }
+                 data = await response.json();
+                 if (data.status === 'ok' && data.position) {
+                     const pos = data.position;
+                     const x = pos.x !== null ? pos.x.toFixed(2) : '---';
+                     const y = pos.y !== null ? pos.y.toFixed(2) : '---';
+                     const z = pos.z !== null ? pos.z.toFixed(2) : '---';
+                     currentPositionEl.textContent = `Position: X:${x} Y:${y} Z:${z}`;
+                     if (!statusMessageEl.classList.contains('text-red-700')) { /* Optional: clear status */ }
+                 } else if (data.status === 'warning') {
+                     const pos = data.position;
+                     const x = pos.x !== null ? pos.x.toFixed(2) : '---';
+                     const y = pos.y !== null ? pos.y.toFixed(2) : '---';
+                     const z = pos.z !== null ? pos.z.toFixed(2) : '---';
+                     currentPositionEl.textContent = `Position: X:${x} Y:${y} Z:${z}`;
+                     updateStatus(data.message || 'Warning fetching position.', false);
+                 }
+             } catch (error) {
+                 console.error('Position Fetch Error:', error);
+                 updateStatus(`Network error fetching position: ${error}`, true);
+             }
+         }
+        // --- End Restored Function ---
+
+        // Start polling and set initial state when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+             console.log("DOM Loaded, attaching listeners and starting polling."); // DEBUG
+             // Ensure elements exist before using them
+             if (statusMessageEl && currentPositionEl && locationNameInput && stepButtonsContainer && homeButton && saveLocationButton) {
+                 attachListeners(); // Attach listeners after confirming elements
+                 updateStatus('Interface loaded. Fetching initial position...');
+                 fetchPosition();
+                 positionInterval = setInterval(fetchPosition, 2000);
+                 updateStepButtons(); // Set initial active step button style
+             } else {
+                 console.error("One or more essential elements not found on DOMContentLoaded!");
+                 updateStatus("Initialization Error: UI elements missing.", true);
+             }
+         });
+
+    </script>
+</body>
+</html>
