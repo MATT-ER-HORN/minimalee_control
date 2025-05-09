@@ -1,4 +1,3 @@
-# Main.py - Instantiation with WiFi/Serial Handler Selection (Removed wait_timeout Arg)
 import configparser
 import sys
 import os
@@ -6,8 +5,8 @@ import traceback # Keep for debugging unexpected errors
 import time # Keep for potential delays
 
 # --- Import Core Classes ---
-# Assumes running from project root (NICHOLS BOT CONTROL)
-COMMANDS = None # Initialize to None before try block
+
+COMMANDS = None 
 try:
     # Import handlers and the shared COMMANDS dictionary
     from comms.wifi_handler import WifiHandler, BASE_HTTP_URL, WS_URL # Keep URL imports if needed globally
@@ -16,8 +15,9 @@ try:
     from hardware_modules.robot import Robot
     from hardware_modules.pump import Pump
     from hardware_modules.sonicator import Sonicator
-    # Import the GUI tool runner
-    import ivoryos # Assuming this is your GUI framework/runner
+    import ivoryos
+    
+    
 
     # --- DEBUG PRINT ---
     # Check if COMMANDS was successfully imported and is a dictionary
@@ -149,9 +149,14 @@ if __name__ == "__main__":
         print(f"Using {comm_mode.upper()} communication.")
         print("Handler, Robot, Pump, and Sonicator objects are ready.")
 
-        # --- Run the GUI Tool ---
+        # --- Run the GUI Tool with plugin ---
+        # from ivoryos_plugin.plugin import plugin
+        # print("\nStarting IvoryOS GUI...")
+        # ivoryos.run(__name__, blueprint_plugins=plugin)
+
+        # --- Run the GUI Tool with no plugin ---
         print("\nStarting IvoryOS GUI...")
-        ivoryos.run(__name__) # Run your GUI tool
+        ivoryos.run(__name__)
 
     except configparser.Error as e:
          print(f"\nError reading configuration file '{CONFIG_FILE}': {e}")

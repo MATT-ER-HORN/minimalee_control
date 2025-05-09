@@ -112,3 +112,25 @@
 2025-05-08 14:44:08 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 50.0})
 2025-05-08 14:44:08 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
 2025-05-08 14:44:08 - No cleanup steps
+2025-05-09 10:24:16 - No prep steps
+2025-05-09 10:24:16 - Executing untitled experiment: 1/2
+2025-05-09 10:24:16 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-05-09 10:24:21 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 50.0})
+2025-05-09 10:24:21 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-09 10:24:21 - Executing untitled experiment: 2/2
+2025-05-09 10:24:21 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-05-09 10:24:32 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 50.0})
+2025-05-09 10:24:32 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-09 10:24:32 - No cleanup steps
+2025-05-09 10:31:51 - No prep steps
+2025-05-09 10:31:51 - Executing untitled experiment: 1/1
+2025-05-09 10:31:51 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-05-09 10:31:55 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 50.0})
+2025-05-09 10:31:55 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-09 10:31:55 - No cleanup steps
+2025-05-09 11:12:57 - No prep steps
+2025-05-09 11:12:57 - Executing untitled experiment: 1/1
+2025-05-09 11:12:57 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-05-09 11:13:01 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 50.0})
+2025-05-09 11:13:01 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
+2025-05-09 11:13:01 - No cleanup steps
