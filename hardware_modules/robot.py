@@ -4,9 +4,7 @@ import json
 import os
 import sys
 import re
-# Need Queue and Empty for get_position logic
 from queue import Queue, Empty
-# Import Handler Classes
 from comms.wifi_handler import WifiHandler
 from comms.serial_handler import SerialHandler
 
@@ -157,10 +155,8 @@ class Robot:
    
     def get_position(self, update_internal: bool = True) -> dict | None:
         """
-        Sends M114, waits for completion, then parses the position report
-        from the handler's message queue.
-
-        Requires "get_position" command in commands.py to have "wait_after": True.
+        Sends M114, then reads the queue looking for BOTH the position
+        report and the 'ok' confirmation.
 
         Args:
             update_internal (bool): If True (default), updates self.current_pos.
@@ -171,80 +167,105 @@ class Robot:
         """
         print(f"[{time.strftime('%H:%M:%S')}] Requesting position (M114)...")
 
-        # Check handler prerequisites
+        # --- Prerequisites Check (Good to keep) ---
         if not hasattr(self.comms, 'message_queue') or not isinstance(self.comms.message_queue, Queue):
             print("Error: Communicator object missing valid 'message_queue'.")
             return None
-        if not hasattr(self.comms, '_clear_queue'):
-             print("Error: Communicator object missing '_clear_queue' method.")
-             # Proceeding without clearing might read old data.
+        # Optional: Check for _clear_queue if you still want to use it
+        # if hasattr(self.comms, '_clear_queue'):
+        #     try: self.comms._clear_queue()
+        #     except Exception as e: print(f"Error calling _clear_queue: {e}")
+        # else:
+        #      print("Warning: Communicator object missing '_clear_queue'. Queue not cleared.")
 
-        # Clear queue BEFORE sending M114
-        try: self.comms._clear_queue()
-        except Exception as e: print(f"Error calling _clear_queue: {e}")
+        # --- Send M114 command WITHOUT waiting for 'ok' in send_command ---
+        # Modification needed here: You need a way to tell send_command NOT to wait.
+        # This might involve:
+        # 1. Adding a `wait=False` argument to send_command:
+        #    success = self.comms.send_command("get_position", wait=False)
+        # 2. Or, defining a different command in COMMANDS specifically for M114
+        #    that has "wait_after": False. Let's assume option 1 for this example.
+        # 3. Or, directly using the handler's lower-level send method if available.
+        #    e.g., self.comms.send("M114")
 
-        # Send M114 command and wait for its 'ok'
-        # CRITICAL: Assumes "get_position" has wait_after=True in COMMANDS
-        if not self.comms.send_command("get_position"):
-             print("Error: Failed to send M114 command or wait failed.")
-             return None
+        # Using placeholder for the non-waiting send:
+        if not self.comms.send_command("get_position", wait=False): # *** MODIFICATION POINT ***
+            print("Error: Failed to send M114 command.")
+            # If send_command doesn't support wait=False, use the direct send method:
+            # if not self.comms.send("M114"):
+            #     print("Error: Failed to send M114 command directly.")
+            #     return None
+            return None # Added return here if send fails
 
-        # Search queue for the position report AFTER 'ok' is received
-        print("  M114 sent and 'ok' received. Searching queue for position report...")
-        found_pos = None
+        # --- Search queue for BOTH position report AND 'ok' ---
+        print("  M114 sent. Searching queue for position report and 'ok'...")
+        found_pos_data = None
+        found_ok = False
         search_start_time = time.time()
-        search_timeout = 2.0 # Time to look for the report after 'ok'
+        # Increased timeout slightly, as we wait for both pieces of info now
+        search_timeout = 5.0
 
-        # Consume messages until the report is found or timeout
-        temp_message_store = [] # Store messages temporarily if needed
         while time.time() - search_start_time < search_timeout:
             try:
-                # Use a short timeout on get() to avoid blocking the main thread for too long
-                # if the message queue is temporarily empty but more data might arrive.
+                # Use a short timeout on get()
                 message = self.comms.message_queue.get(timeout=0.1)
-                temp_message_store.append(message) # Store for potential re-queuing
                 # print(f"  [GetPos Check] Queue item: '{message}'") # Verbose Debug
-                match = self.m114_pattern.search(message)
-                if match:
+
+                # Check for position report
+                pos_match = self.m114_pattern.search(message)
+                if pos_match and found_pos_data is None: # Process only the first match
                     try:
                         pos = {
-                             'x': float(match.group(1)),
-                             'y': float(match.group(2)),
-                             'z': float(match.group(3)),
-                             'e': float(match.group(4))
+                            'x': float(pos_match.group(1)),
+                            'y': float(pos_match.group(2)),
+                            'z': float(pos_match.group(3)),
+                            'e': float(pos_match.group(4))
                         }
-                        found_pos = pos
-                        print(f"  Parsed position: {found_pos}")
+                        found_pos_data = pos
+                        print(f"  Parsed position: {found_pos_data}")
+                        # Update internal position immediately if requested
                         if update_internal:
-                             print("  Updating internal robot position.")
-                             self.current_pos = found_pos
-                        # Found it, stop searching
-                        break
+                            print("  Updating internal robot position.")
+                            self.current_pos = found_pos_data
                     except (ValueError, IndexError) as parse_e:
-                        print(f"  Error parsing numbers from M114 match: {match.groups()}. Error: {parse_e}")
-                        # Continue searching other messages
+                        print(f"  Error parsing numbers from M114 match: {pos_match.groups()}. Error: {parse_e}")
+                    # Do NOT break yet, still need the 'ok'
+
+                # Check for 'ok'
+                if self.ok_pattern.search(message):
+                     print("  'ok' received.")
+                     found_ok = True
+
+                # Exit loop ONLY if both are found
+                if found_pos_data and found_ok:
+                    break
+
             except Empty:
-                # Queue is empty, continue loop until search_timeout
-                if found_pos: break # Exit if found before queue became empty
-                # No need to sleep here, the get(timeout=0.1) provides a small pause
+                # Queue is temporarily empty, continue waiting if timeout not reached
+                # If we already found both, we can exit early
+                if found_pos_data and found_ok:
+                     break
+                # No need to sleep, timeout=0.1 in get() handles polling delay
                 pass
             except Exception as e:
                 print(f"  Error reading message queue during position search: {e}")
+                # Optionally log traceback: import traceback; traceback.print_exc()
                 break # Stop on unexpected errors
 
-        # Optional: Put back messages that were read but not the position report?
-        # This adds complexity. Simpler to assume other messages are less critical.
-        # for msg in reversed(temp_message_store):
-        #    if not self.m114_pattern.search(msg):
-        #        try: self.comms.message_queue.put_nowait(msg)
-        #        except Exception: pass # Ignore if queue full etc.
-
-        if found_pos:
-             return found_pos
+        # --- Check results after loop ---
+        if found_pos_data and found_ok:
+            print(f"[{time.strftime('%H:%M:%S')}] Position retrieved successfully.")
+            return found_pos_data
+        elif found_pos_data:
+            print("Warning: Found position report but did not receive 'ok' within timeout.")
+            # Decide whether to return potentially valid position without 'ok' or None
+            return found_pos_data # Or return None
+        elif found_ok:
+            print("Warning: Received 'ok' but did not find position report within timeout.")
+            return None
         else:
-             print("Warning: Did not find position report in queue within timeout after M114 'ok'.")
-             # Return the last known position? Or None? None is safer.
-             return None
+            print("Warning: Timed out waiting for position report and/or 'ok'.")
+            return None
 
 
     def move_z(self, z: float, speed: float | None = None) -> bool:

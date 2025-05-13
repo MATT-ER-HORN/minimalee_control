@@ -1,229 +1,250 @@
-
-import sys
 import os
-import configparser
-import time
-import traceback
-import logging
+import logging # Import logging
+from flask import Blueprint, render_template, request, jsonify, current_app, url_for # Import url_for
 
-# Get the absolute path of the directory containing this file (plugin/)
-plugin_dir = os.path.dirname(os.path.abspath(__file__))
-# Go up ONE level to get the project root
-project_root = os.path.abspath(os.path.join(plugin_dir, '..'))
-# Add the project root to the Python path if it's not already there
-if project_root not in sys.path:
-    print(f"Adding project root to sys.path: {project_root}")
-    sys.path.insert(0, project_root)
-# --- End path modification ---
+# --- Configure logging ---
+# Basic configuration, adjust format and level as needed
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+log = logging.getLogger(__name__) # Create a logger instance for this module
 
-# --- Now imports should work from the project root ---
-from flask import Flask, render_template, request, jsonify
+# --- Attempt to import GlobalConfig, provide fallback ---
 try:
-    # Assuming these names and locations are correct relative to project root
-    from comms.wifi_handler import WifiHandler # Use correct name if changed (e.g., ESP3DHandler)
-    from comms.serial_handler import SerialHandler
-    from comms.commands import COMMANDS
-    from hardware_modules.robot import Robot
-    from hardware_modules.pump import Pump
-    from hardware_modules.sonicator import Sonicator
-except ImportError as e:
-    print(f"Import Error: {e}")
-    sys.exit(f"Could not import required modules from 'comms' or 'hardware_modules'. Check paths, __init__.py files, and ensure script is run correctly. Error: {e}")
+    from ivoryos.utils.global_config import GlobalConfig
+    global_config = GlobalConfig()
+    log.info("Successfully imported GlobalConfig from ivoryos.")
+except ImportError:
+    log.warning("Could not import GlobalConfig from ivoryos. Using fallback.")
+    # Define fallback classes if GlobalConfig is not available
+    class DummyHardware:
+        # Add attributes expected by the routes to avoid AttributeError later
+        locations = {}
+        default_speed = 3000.0
+        current_pos = {'x': None, 'y': None, 'z': None}
+        is_connected = False # Assume not connected in fallback
 
-# --- Configuration (Relative to project root now) ---
-CONFIG_FILE = os.path.join(project_root, 'config.ini')
-LOCATIONS_FILE = os.path.join(project_root, 'locations.json')
-INIT_GCODE_FILE = os.path.join(project_root, 'robot_init.gcode')
+        # Add dummy methods returning False or None as appropriate
+        def move_relative(self, *args, **kwargs): return False
+        def get_position(self, *args, **kwargs): return self.current_pos
+        def add_location(self, *args, **kwargs): return False
+        def home(self, *args, **kwargs): return False
 
-# --- Global Variables ---
-handler = None
-robot = None
-pump = None     # Uncomment if using
-sonicator = None # Uncomment if using
+    class DummyDeck:
+        handler = DummyHardware() # Use DummyHardware for handler too
+        robot = DummyHardware()
+        pump = DummyHardware() # Add placeholders even if not used in these routes
+        sonicator = DummyHardware() # Add placeholders
 
-# Configure basic logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    class GlobalFallback:
+        deck = DummyDeck()
 
-# --- Flask App Setup ---
-# Use template_folder='templates' relative to this app.py file
-app = Flask(__name__, template_folder='templates', static_folder='static')
+    global_config = GlobalFallback() # Assign the fallback instance
 
-# --- Helper Functions ---
-def initialize_system():
-    """Loads config, creates handler and device instances, connects."""
-    global handler, robot, pump, sonicator # Allow modification of global variables
+# --- Define the Blueprint ---
+plugin = Blueprint(
+    "plugin",
+    __name__,
+    # Define paths relative to the current file's directory
+    template_folder=os.path.join(os.path.dirname(__file__), "templates"),
+    static_folder=os.path.join(os.path.dirname(__file__), "static")
+    # IvoryOS likely handles the url_prefix when registering the blueprint
+)
 
-    logging.info("--- Initializing Nichols Bot Control System ---")
-    config = configparser.ConfigParser(inline_comment_prefixes=';')
-    if not os.path.exists(CONFIG_FILE):
-        logging.error(f"Configuration file '{CONFIG_FILE}' not found. Exiting.")
-        sys.exit(1)
-    config.read(CONFIG_FILE)
+# --- Main Route to Render UI ---
+@plugin.route('/', endpoint='main')
+def main():
+    """Renders the main control interface."""
+    log.info(f"Rendering main plugin page for endpoint '{request.endpoint}'.")
+    # Check if the base template exists (depends on IvoryOS environment)
+    base_exists = "base.html" in current_app.jinja_env.list_templates()
+
+    # Safely get robot and locations from global_config
+    robot = getattr(global_config.deck, 'robot', None)
+    locations = getattr(robot, 'locations', {}) if robot else {}
+    log.debug(f"Base template exists: {base_exists}, Robot found: {bool(robot)}, Locations: {locations}")
+
+    # Generate API URLs dynamically using url_for relative to this blueprint
+    # This ensures URLs are correct even with IvoryOS's prefixing
+    try:
+        api_urls = {
+            "move": url_for('.handle_move'),
+            "home": url_for('.handle_home'),
+            "get_position": url_for('.get_current_position'),
+            "save_location": url_for('.save_location')
+        }
+        log.debug(f"Generated API URLs: {api_urls}")
+    except Exception as e:
+        # This might happen if routes are not yet fully registered or context is wrong
+        log.exception("Error generating API URLs with url_for!")
+        api_urls = {} # Provide empty dict as fallback
+
+    return render_template(
+        'index.html',
+        base_exists=base_exists,
+        locations=locations,
+        api_urls=api_urls
+    )
+
+# --- API Route for Moving the Robot ---
+@plugin.route('/move', methods=['POST'], endpoint='handle_move')
+def handle_move():
+    """Handles relative movement commands for the robot."""
+    log.info(f"Received request for endpoint '{request.endpoint}' ({request.method} {request.path})")
+    robot = getattr(global_config.deck, 'robot', None)
+    handler = getattr(global_config.deck, 'handler', None)
+    # Check handler connectivity safely using getattr
+    is_connected = getattr(handler, 'is_connected', False) if handler else False
+    log.info(f"State check - Robot: {bool(robot)}, Handler: {bool(handler)}, Connected: {is_connected}")
+
+    # Validate hardware state
+    if not (robot and handler and is_connected):
+        log.error("Move failed: Robot or Handler not ready or not connected.")
+        return jsonify({"status": "error", "message": "Robot not ready or not connected"}), 500
+
+    # Get parameters from the form data
+    direction = request.form.get('direction')
+    try:
+        step = float(request.form.get('step', '10.0')) # Default to string '10.0'
+        log.debug(f"Move parameters - Direction: {direction}, Step: {step}")
+    except ValueError:
+        log.warning(f"Invalid step value received: {request.form.get('step')}")
+        return jsonify({"status": "error", "message": "Invalid step value"}), 400 # Bad Request
+
+    # Map direction to coordinate changes
+    dx = dy = dz = 0
+    if direction == 'x_plus': dx = step
+    elif direction == 'x_minus': dx = -step
+    elif direction == 'y_plus': dy = step
+    elif direction == 'y_minus': dy = -step
+    elif direction == 'z_plus': dz = step
+    elif direction == 'z_minus': dz = -step
+    else:
+        log.warning(f"Invalid direction received: {direction}")
+        return jsonify({"status": "error", "message": "Invalid direction command"}), 400 # Bad Request
+
+    # Execute the move command
+    try:
+        default_speed = getattr(robot, 'default_speed', 3000.0)
+        log.info(f"Executing move_relative: dx={dx}, dy={dy}, dz={dz}, speed={default_speed}")
+        success = robot.move_relative(dx=dx, dy=dy, dz=dz, speed=default_speed)
+        if success:
+            log.info(f"Move '{direction}' successful.")
+            # Optionally update internal position after move if needed
+            # robot.get_position(update_internal=True)
+            return jsonify({"status": "ok", "message": f"Moved {direction} by {step}mm"})
+        else:
+            log.error("Robot move_relative command returned False.")
+            return jsonify({"status": "error", "message": "Robot move command failed"}), 500 # Internal Server Error
+    except Exception as e:
+        log.exception("Exception during robot.move_relative!")
+        return jsonify({"status": "error", "message": f"Error during move: {e}"}), 500
+
+# --- API Route to Get Current Position ---
+@plugin.route('/get_position', methods=['GET'], endpoint='get_current_position')
+def get_position():
+    """Retrieves the current position of the robot."""
+    log.info(f"Received request for endpoint '{request.endpoint}' ({request.method} {request.path})")
+    robot = getattr(global_config.deck, 'robot', None)
+    handler = getattr(global_config.deck, 'handler', None)
+    is_connected = getattr(handler, 'is_connected', False) if handler else False
+    log.info(f"State check - Robot: {bool(robot)}, Handler: {bool(handler)}, Connected: {is_connected}")
+
+    # No need to check connection strictly for get_position, but robot must exist
+    if not robot:
+        log.error("Get position failed: Robot object not found.")
+        return jsonify({"status": "error", "message": "Robot not available"}), 500
 
     try:
-        comm_mode = config.get('Connection', 'mode', fallback='wifi').lower()
-        robot_safe_z = config.getfloat('Robot', 'safe_z')
-        robot_default_speed = config.getfloat('Robot', 'default_speed')
-        # Load pump config
-        pump_mm_per_ml = config.getfloat('Pump', 'mm_per_ml')
-        # pump_default_rate = config.getfloat('Pump', 'default_rate_ml_min') # Removed in simplified Pump
-        # pump_max_feedrate = config.getfloat('Pump', 'max_feedrate_mm_min') # Removed in simplified Pump
+        log.debug("Attempting to get robot position.")
+        # Prefer fetching fresh position, fallback to stored current_pos
+        pos = robot.get_position(update_internal=True) # Try to update from hardware
+        if pos is None or pos.get('x') is None: # Check if fetch failed or incomplete
+             log.warning("get_position() returned None or incomplete data, using stored current_pos.")
+             pos = getattr(robot, 'current_pos', {'x': None, 'y': None, 'z': None})
 
-        logging.info(f"Selected communication mode: {comm_mode}")
-        # Instantiate Handler (assuming COMMANDS imported correctly)
-        if comm_mode == 'serial':
-            serial_port = config.get('Connection', 'serial_port')
-            baud_rate = config.getint('Connection', 'baud_rate')
-            handler = SerialHandler(port=serial_port, baudrate=baud_rate, commands_dict=COMMANDS)
-        elif comm_mode == 'wifi':
-            # Load URLs from config or use defaults defined elsewhere (e.g., in handler file or imported)
-            http_url = config.get('Connection', 'http_url', fallback='http://192.168.0.1:80') # Example fallback
-            ws_url = config.get('Connection', 'ws_url', fallback='ws://192.168.0.1:81/')   # Example fallback
-            handler = WifiHandler(http_url=http_url, ws_url=ws_url, commands_dict=COMMANDS)
+        log.info(f"Returning position: {pos}")
+        # Check if the position dictionary has valid coordinates
+        if pos and pos.get('x') is not None and pos.get('y') is not None and pos.get('z') is not None:
+            return jsonify({"status": "ok", "position": pos})
         else:
-            logging.error(f"Invalid communication mode '{comm_mode}' in config.ini.")
-            sys.exit(1)
+            log.warning("Position data is incomplete or unavailable.")
+            return jsonify({"status": "warning", "message": "Position data unavailable", "position": pos or {}})
 
-        # Instantiate Devices
-        robot = Robot(
-            communicator=handler,
-            safe_z=robot_safe_z,
-            default_speed=robot_default_speed,
-            locations_filepath=LOCATIONS_FILE,
-            init_gcode_filepath=INIT_GCODE_FILE
-        )
-        pump = Pump(
-            comms=handler,
-            mm_per_ml=pump_mm_per_ml
-            # Pass other pump args if needed
-        )
-        sonicator = Sonicator(
-            comms=handler
-        )
-
-        logging.info("Components instantiated. Connecting...")
-        if not handler.connect():
-            logging.error("Failed to connect to the GCode Handler.")
-            sys.exit(1)
-
-        logging.info("Applying initial robot configuration...")
-        if not robot.apply_initial_config():
-            logging.warning("Failed to apply initial robot configuration.")
-            # Decide if this is fatal
-
-        logging.info("--- System Initialized Successfully ---")
-        return True
-
-    except (configparser.Error, KeyError, ValueError) as e:
-        logging.error(f"Error processing configuration file '{CONFIG_FILE}': {e}")
-        sys.exit(1)
     except Exception as e:
-        logging.error(f"Unexpected error during initialization: {e}")
-        traceback.print_exc()
-        sys.exit(1)
+        log.exception("Exception during robot.get_position!")
+        return jsonify({"status": "error", "message": f"Error getting position: {e}"}), 500
 
-# --- Flask Routes ---
-# (Routes remain the same as before)
-@app.route('/')
-def index():
-    """Render the main control page."""
-    # Ensure robot exists before accessing locations
-    locations = robot.locations if robot and hasattr(robot, 'locations') else {}
-    return render_template('index.html', locations=locations)
-
-@app.route('/move', methods=['POST'])
-def handle_move():
-    """Handle jogging movements."""
-    if not robot or not handler or not handler.is_connected: return jsonify({"status": "error", "message": "Robot not initialized or connected"}), 500
-    direction = request.form.get('direction'); step = float(request.form.get('step', 10.0)); speed = robot.default_speed
-    logging.info(f"Received move request: direction={direction}, step={step}")
-    success = False
-    if direction == 'x_plus': success = robot.move_relative(dx=step, speed=speed)
-    elif direction == 'x_minus': success = robot.move_relative(dx=-step, speed=speed)
-    elif direction == 'y_plus': success = robot.move_relative(dy=step, speed=speed)
-    elif direction == 'y_minus': success = robot.move_relative(dy=-step, speed=speed)
-    elif direction == 'z_plus': success = robot.move_relative(dz=step, speed=speed)
-    elif direction == 'z_minus': success = robot.move_relative(dz=-step, speed=speed)
-    else: return jsonify({"status": "error", "message": "Invalid direction"}), 400
-    if success: return jsonify({"status": "ok", "message": f"Move {direction} sent."})
-    else: return jsonify({"status": "error", "message": f"Failed to send move {direction}."}), 500
-
-@app.route('/get_position', methods=['GET'])
-def get_current_position():
-    """Get the current position (stubbed/optimistic)."""
-    if not robot: return jsonify({"status": "error", "message": "Robot not initialized"}), 500
-    # Use the potentially optimistic position stored in the robot object
-    pos = robot.current_pos
-    # Attempt to update with a fresh reading (best effort)
-    live_pos = robot.get_position() # Call without update_internal
-    if live_pos:
-        pos = live_pos # Use live position if available
-        robot.current_pos = live_pos # Update internal state
-
-    if pos and pos.get('x') is not None: # Check if position is valid
-        return jsonify({"status": "ok", "position": pos})
-    else:
-        # Return the potentially stale position if live failed, or indicate unknown
-        unknown_pos = {'x': None, 'y': None, 'z': None, 'e': None}
-        return jsonify({"status": "warning", "message": "Could not retrieve current position.", "position": pos or unknown_pos})
-
-
-@app.route('/save_location', methods=['POST'])
+# --- API Route to Save Current Location ---
+@plugin.route('/save_location', methods=['POST'], endpoint='save_location')
 def save_location():
-    """Save the current position with a given name."""
-    if not robot or not handler or not handler.is_connected: return jsonify({"status": "error", "message": "Robot not initialized or connected"}), 500
-    name = request.form.get('name');
-    if not name: return jsonify({"status": "error", "message": "Location name cannot be empty"}), 400
-    logging.info(f"Request to save location: '{name}'")
+    """Saves the robot's current position with a given name."""
+    log.info(f"Received request for endpoint '{request.endpoint}' ({request.method} {request.path})")
+    robot = getattr(global_config.deck, 'robot', None)
+    handler = getattr(global_config.deck, 'handler', None)
+    is_connected = getattr(handler, 'is_connected', False) if handler else False
+    log.info(f"State check - Robot: {bool(robot)}, Handler: {bool(handler)}, Connected: {is_connected}")
 
-    # --- IMPORTANT: Get REAL position before saving ---
-    # *** FIX: Call get_position() without the argument ***
-    current_pos = robot.get_position() # Try to update from M114
-    if current_pos is None:
-         # Fallback to the potentially stale internal value if M114 failed
-         current_pos = robot.current_pos
-         logging.warning(f"Could not get live position, saving potentially stale position: {current_pos}")
-         if current_pos.get('x') is None: # Check if we have any valid coordinates
-              return jsonify({"status": "error", "message": "Cannot determine current position to save."}), 500
+    # Validate hardware state - need connection to get reliable current position
+    if not (robot and handler and is_connected):
+        log.error("Save location failed: Robot or Handler not ready or not connected.")
+        return jsonify({"status": "error", "message": "Robot not ready or not connected"}), 500
 
-    # Ensure we have valid coordinates before saving
-    if not all(k in current_pos and current_pos[k] is not None for k in ('x', 'y', 'z')):
-         return jsonify({"status": "error", "message": f"Cannot save, current position data is incomplete: {current_pos}"}), 500
+    # Get location name from form data
+    name = request.form.get('name')
+    if not name:
+        log.warning("Save location failed: Name not provided.")
+        return jsonify({"status": "error", "message": "Location name is required"}), 400 # Bad Request
+    log.debug(f"Save location request - Name: {name}")
 
-    # Use the Robot class's method to add/update and save to JSON
-    success = robot.add_location(name, current_pos['x'], current_pos['y'], current_pos['z'])
+    try:
+        log.debug("Getting current position to save.")
+        # Ensure we get the most recent position from the robot
+        pos = robot.get_position(update_internal=True)
+        if pos is None or not all(pos.get(k) is not None for k in ('x', 'y', 'z')):
+             log.error(f"Save location failed: Could not get complete current position. Got: {pos}")
+             return jsonify({"status": "error", "message": "Failed to get complete current position from robot"}), 500
 
-    if success:
-        # Return the updated locations list for the frontend
-        return jsonify({"status": "ok", "message": f"Location '{name}' saved.", "locations": robot.locations})
-    else:
-        return jsonify({"status": "error", "message": f"Failed to save location '{name}'."}), 500
+        log.info(f"Attempting to save location '{name}' at position: {pos}")
+        success = robot.add_location(name, pos['x'], pos['y'], pos['z'])
 
-@app.route('/home', methods=['POST'])
-def handle_home():
-    """Handle homing request."""
-    if not robot or not handler or not handler.is_connected: return jsonify({"status": "error", "message": "Robot not initialized or connected"}), 500
-    logging.info("Received home request")
-    success = robot.home()
-    if success: return jsonify({"status": "ok", "message": "Homing command sent."})
-    else: return jsonify({"status": "error", "message": "Failed to send home command."}), 500
+        if success:
+            log.info(f"Location '{name}' saved successfully.")
+            # Return the updated list of locations
+            return jsonify({"status": "ok", "message": f"Saved location '{name}'", "locations": robot.locations})
+        else:
+            log.error(f"Robot add_location command returned False for name '{name}'.")
+            return jsonify({"status": "error", "message": "Failed to save location on robot"}), 500
+    except Exception as e:
+        log.exception(f"Exception during save_location for name '{name}'!")
+        return jsonify({"status": "error", "message": f"Error saving location: {e}"}), 500
 
+# --- API Route for Homing the Robot ---
+@plugin.route('/home', methods=['POST'], endpoint='handle_home')
+def home():
+    """Sends the home command to the robot."""
+    log.info(f"Received request for endpoint '{request.endpoint}' ({request.method} {request.path})")
+    robot = getattr(global_config.deck, 'robot', None)
+    handler = getattr(global_config.deck, 'handler', None)
+    is_connected = getattr(handler, 'is_connected', False) if handler else False
+    log.info(f"State check - Robot: {bool(robot)}, Handler: {bool(handler)}, Connected: {is_connected}")
 
-# # --- Teardown ---
-# @app.teardown_appcontext
-# def shutdown_handler(exception=None):
-#     global handler
-#     if handler and getattr(handler, 'is_connected', False):
-#         logging.info("Flask app shutting down, disconnecting handler...")
-#         handler.disconnect()
+    # Validate hardware state
+    if not (robot and handler and is_connected):
+        log.error("Home command failed: Robot or Handler not ready or not connected.")
+        return jsonify({"status": "error", "message": "Robot not ready or not connected"}), 500
 
-# --- Main Execution ---
-if __name__ == '__main__':
-    # Initialize system first
-    if initialize_system():
-        logging.info("Starting Flask development server...")
-        # Run the app
-        app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False) # Disable reloader for serial stability
-    else:
-        logging.error("System initialization failed. Flask app will not start.")
+    try:
+        log.info("Executing robot.home()")
+        success = robot.home()
+        if success:
+            log.info("Homing successful.")
+            # Optionally update internal position after homing
+            # robot.get_position(update_internal=True)
+            return jsonify({"status": "ok", "message": "Homing command sent successfully"})
+        else:
+            log.error("Robot home command returned False.")
+            return jsonify({"status": "error", "message": "Robot homing command failed"}), 500
+    except Exception as e:
+        log.exception("Exception during robot.home!")
+        return jsonify({"status": "error", "message": f"Error during homing: {e}"}), 500
 
+# --- End of app.py ---

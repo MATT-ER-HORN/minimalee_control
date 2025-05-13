@@ -14,7 +14,7 @@ COMMANDS = {
         "gcode": "M114",
         "desc": "Report current position",
         "params": [],
-        "wait_after": True, 
+        "wait_after": False, 
         "send_m400_before_wait": False
     },
     "move": {

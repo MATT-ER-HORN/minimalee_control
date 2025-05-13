@@ -1,284 +1,339 @@
+{% if base_exists %}
+    {% extends 'base.html' %}
+    {% block title %}Robot Control{% endblock %}
+{% else %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robot Control (Tailwind Utilities)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    </head>
-<body class="bg-gray-100 font-sans p-4 md:p-8">
-    <div class="max-w-3xl mx-auto bg-gray-50 p-4 rounded-lg">
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Robot Control Interface</h1>
-
-        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-6">
-            <h2 class="text-lg font-semibold mb-2 text-gray-700">Status</h2>
-            <div id="status-message" class="mt-1 p-3 bg-gray-100 border border-gray-200 rounded-md min-h-[40px] text-gray-700 text-sm">Connecting...</div>
-            <div id="current-position" class="mt-1 p-3 bg-gray-100 border border-gray-200 rounded-md min-h-[40px] text-gray-700 text-sm mt-2">Position: X:--- Y:--- Z:---</div>
-        </div>
-
-        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-6">
-            <div class="flex justify-between items-center mb-4">
-                 <h2 class="text-lg font-semibold text-gray-700">Jog Controls</h2>
-                 <button id="home-btn" class="px-4 py-2 m-1 font-semibold text-white bg-red-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed">Home All</button>
-            </div>
-
-            <div class="flex items-center mb-4 border-b pb-3">
-                <span class="mr-3 font-medium text-sm text-gray-600">Step (mm):</span>
-                <div id="step-buttons" class="flex flex-wrap gap-1">
-                    <button class="px-3 py-1 m-1 text-sm font-medium border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-150 ease-in-out bg-white text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-gray-400" data-step="0.1">0.1</button>
-                    <button class="px-3 py-1 m-1 text-sm font-medium border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-150 ease-in-out bg-white text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-gray-400" data-step="1">1</button>
-                    <button class="px-3 py-1 m-1 text-sm font-medium border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-150 ease-in-out bg-white text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-gray-400" data-step="10">10</button> <button class="px-3 py-1 m-1 text-sm font-medium border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-150 ease-in-out bg-white text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-gray-400" data-step="50">50</button>
-                    <button class="px-3 py-1 m-1 text-sm font-medium border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-150 ease-in-out bg-white text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-gray-400" data-step="100">100</button>
-                </div>
-            </div>
-
-            <div class="flex justify-center items-center gap-4">
-                 <div class="grid grid-cols-3 gap-1 justify-items-center items-center w-48">
-                     <div></div>
-                     <button id="y-plus" class="btn-arrow px-4 py-2 m-1 font-semibold text-white bg-blue-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 flex items-center justify-center text-xl p-1" data-direction="y_plus" title="Y+">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" /></svg>
-                     </button>
-                     <div></div>
-
-                     <button id="x-minus" class="btn-arrow px-4 py-2 m-1 font-semibold text-white bg-blue-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 flex items-center justify-center text-xl p-1" data-direction="x_minus" title="X-">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                     </button>
-                     <div class="w-14 h-14 flex items-center justify-center font-bold text-gray-400 text-lg">XY</div>
-                     <button id="x-plus" class="btn-arrow px-4 py-2 m-1 font-semibold text-white bg-blue-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 flex items-center justify-center text-xl p-1" data-direction="x_plus" title="X+">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                      </button>
-
-                     <div></div>
-                     <button id="y-minus" class="btn-arrow px-4 py-2 m-1 font-semibold text-white bg-blue-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 flex items-center justify-center text-xl p-1" data-direction="y_minus" title="Y-">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                     </button>
-                      <div></div>
-                 </div>
-                 <div class="flex flex-col gap-1 items-center w-16 ml-4">
-                      <div class="font-bold text-gray-400 text-lg mb-1">Z</div>
-                      <button id="z-plus" class="btn-arrow px-4 py-2 m-1 font-semibold text-white bg-blue-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 flex items-center justify-center text-xl p-1 w-full" data-direction="z_plus" title="Z+">
-                           <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                      </button>
-                      <button id="z-minus" class="btn-arrow px-4 py-2 m-1 font-semibold text-white bg-blue-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 flex items-center justify-center text-xl p-1 w-full" data-direction="z_minus" title="Z-">
-                           <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                      </button>
-                 </div>
-            </div>
-        </div>
-
-        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-6">
-            <h2 class="text-lg font-semibold mb-3 text-gray-700">Save Location</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                <label for="location-name" class="md:col-span-1 font-medium text-sm text-gray-600">Name:</label>
-                <input type="text" id="location-name" placeholder="e.g., home_safe" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm md:col-span-2">
-                <div class="md:col-start-2 md:col-span-2 flex justify-end">
-                     <button id="save-location-btn" class="px-4 py-2 m-1 font-semibold text-white bg-green-500 rounded-md shadow-sm transition duration-150 ease-in-out hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed w-full md:w-auto">Save Current Position</button>
-                </div>
-            </div>
-        </div>
-
-         <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-6">
-             <h2 class="text-lg font-semibold mb-2 text-gray-700">Saved Locations</h2>
-             {% if locations %}
-                 <ul class="list-disc list-inside bg-gray-50 p-3 rounded border max-h-48 overflow-y-auto">
-                     {# Loop through sorted locations - Jinja comment #}
-                     {% for name, coords in locations.items() | sort %}
-                         <li class="text-sm text-gray-700 mb-1">
-                             <span class="font-medium">{{ name }}:</span>
-                             {# Use .get with default for safety - Jinja comment #}
-                             X:{{ coords.get('x', 'N/A') | round(2) }}
-                             Y:{{ coords.get('y', 'N/A') | round(2) }}
-                             Z:{{ coords.get('z', 'N/A') | round(2) }}
-                         </li>
-                     {% endfor %}
-                 </ul>
-             {% else %}
-                 <p class="text-sm text-gray-500 italic">No locations loaded or available.</p>
-             {% endif %}
-         </div>
-
-    </div>
-
-    <script>
-        // --- Ensure DOM elements exist before assigning ---
-        const statusMessageEl = document.getElementById('status-message');
-        const currentPositionEl = document.getElementById('current-position');
-        const locationNameInput = document.getElementById('location-name');
-        const stepButtonsContainer = document.getElementById('step-buttons');
-        const homeButton = document.getElementById('home-btn'); // Get specific buttons too
-        const saveLocationButton = document.getElementById('save-location-btn');
-
-        let currentJogStep = 10.0; // Default step
-
-        // --- Classes for step buttons ---
-        const stepBtnBaseClasses = ['px-3', 'py-1', 'm-1', 'text-sm', 'font-medium', 'border', 'rounded-md', 'shadow-sm', 'focus:outline-none', 'focus:ring-2', 'focus:ring-indigo-500', 'focus:ring-opacity-75', 'transition', 'duration-150', 'ease-in-out'];
-        const stepBtnInactiveClasses = ['bg-white', 'text-gray-700', 'border-gray-300', 'hover:bg-gray-100', 'hover:border-gray-400'];
-        const stepBtnActiveClasses = ['bg-indigo-700', 'text-white', 'border-indigo-800', 'shadow-lg', 'ring-2', 'ring-offset-1', 'ring-indigo-500', 'font-bold', 'scale-105']; // Added scale-105
-
-        // --- Helper Functions (updateStatus, sendPostRequest) ---
-        // --- Restored function definitions ---
-        function updateStatus(message, isError = false) {
-            if (statusMessageEl) { // Check if element exists
-                console.log("Status:", message);
-                statusMessageEl.textContent = message;
-                statusMessageEl.className = `mt-1 p-3 border rounded-md min-h-[40px] text-sm ${isError ? 'bg-red-100 border-red-200 text-red-700' : 'bg-gray-100 border-gray-200 text-gray-700'}`;
-            } else {
-                console.error("Status message element not found!");
-            }
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Robot Control</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js" defer></script>
+    <style>
+        /* Keep status message transitions */
+        #statusMessageArea {
+            transition: opacity 0.5s ease-in-out, height 0.3s ease-out, margin 0.3s ease-out, padding 0.3s ease-out;
         }
-        async function sendPostRequest(url, formData) {
-            try {
-                const response = await fetch(url, { method: 'POST', body: formData });
-                let data;
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.indexOf("application/json") !== -1) {
-                    data = await response.json();
-                } else {
-                    const textResponse = await response.text();
-                    console.error("Received non-JSON response:", textResponse);
-                    updateStatus(`Server returned non-JSON response (Status: ${response.status}). Check console.`, true);
-                    return false;
-                }
-
-                if (response.ok && data.status === 'ok') {
-                    updateStatus(data.message || `${url} sent successfully.`);
-                    if (data.locations) { window.location.reload(); } // Refresh on save
-                    if (url === '/move' || url === '/home') { setTimeout(fetchPosition, 300); }
-                    return true;
-                } else {
-                    updateStatus(data.message || `Error with ${url}. Status: ${response.status}`, true);
-                    return false;
-                }
-            } catch (error) {
-                console.error('Fetch Error:', error);
-                updateStatus(`Network error or server unavailable: ${error}`, true);
-                return false;
-            }
+        .status-hidden {
+            opacity: 0; display: block; height: 0; overflow: hidden;
+            margin-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; border: none !important;
         }
-        // --- Update Step Button Styles ---
-        function updateStepButtons() {
-            if (!stepButtonsContainer) { console.error("Step buttons container not found!"); return; }
-            stepButtonsContainer.querySelectorAll('button[data-step]').forEach(btn => {
-                const stepValue = parseFloat(btn.getAttribute('data-step'));
-                btn.className = ''; // Clear existing classes
-                stepBtnBaseClasses.forEach(cls => btn.classList.add(cls)); // Add base classes
-                if (Math.abs(stepValue - currentJogStep) < 1e-6) {
-                    stepBtnActiveClasses.forEach(cls => btn.classList.add(cls));
+         .status-visible { opacity: 1; height: auto; }
+
+        /* Keep position display text colors */
+        #positionDisplay .text-success { color: #198754 !important; }
+        #positionDisplay .text-warning { color: #ffc107 !important; }
+        #positionDisplay .text-danger { color: #dc3545 !important; }
+        #positionDisplay .text-muted { color: #6c757d !important; }
+
+        /* Remove previous custom grid/flex CSS for buttons */
+        /* .movement-grid, .z-controls, .movement-container { ... } */
+
+        /* Optional: Ensure buttons have some minimum width if needed */
+        .move-btn {
+             min-width: 80px; /* Adjust as needed */
+             margin: 2px; /* Add tiny margin */
+        }
+        .z-btn {
+             min-width: 55px; /* Adjust as needed for Z buttons */
+             margin: 2px;
+        }
+
+    </style>
+</head>
+<body>
+{% endif %}
+
+{% block body %}
+<div class="container mt-4"
+     id="robot-control-container"
+     data-api-move-url="{{ api_urls.move }}"
+     data-api-home-url="{{ api_urls.home }}"
+     data-api-get-position-url="{{ api_urls.get_position }}"
+     data-api-save-location-url="{{ api_urls.save_location }}">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+
+            <h1 class="mb-4 text-center">Robot Control Plugin</h1>
+
+            <div id="statusMessageArea" class="alert status-hidden" role="alert"></div>
+            <div class="card mb-4">
+                <div class="card-header">Move Robot</div>
+                <div class="card-body">
+
+                    <div class="mb-3 d-flex align-items-center flex-wrap gap-3 justify-content-center">
+                        <label class="form-label mb-0 fw-bold">Step (mm):</label>
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Select step size">
+                            <input type="radio" class="btn-check" name="stepSelect" id="step01" value="0.1" autocomplete="off">
+                            <label class="btn btn-outline-secondary" for="step01">0.1</label>
+                            <input type="radio" class="btn-check" name="stepSelect" id="step1" value="1" autocomplete="off">
+                            <label class="btn btn-outline-secondary" for="step1">1</label>
+                            <input type="radio" class="btn-check" name="stepSelect" id="step10" value="10" autocomplete="off" checked>
+                            <label class="btn btn-outline-secondary" for="step10">10</label>
+                            <input type="radio" class="btn-check" name="stepSelect" id="step50" value="50" autocomplete="off">
+                            <label class="btn btn-outline-secondary" for="step50">50</label>
+                        </div>
+                    </div> <hr class="my-3">
+
+                    <div class="text-center"> <div class="row justify-content-center mb-1">
+                            <div class="col-auto"> <button class="btn btn-primary move-btn" onclick="move('y_plus')" title="Move Y+">
+                                    <i class="bi bi-arrow-up"></i> Y+
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-center mb-1">
+                            <div class="col-auto">
+                                <button class="btn btn-primary move-btn" onclick="move('x_minus')" title="Move X-">
+                                    <i class="bi bi-arrow-left"></i> X-
+                                </button>
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-primary move-btn" onclick="home()" title="Home All Axes">
+                                    <i class="bi bi-house"></i> Home
+                                </button>
+                            </div>
+                            <div class="col-auto">
+                                 <button class="btn btn-primary move-btn" onclick="move('x_plus')" title="Move X+">
+                                    X+ <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-center mb-3"> <div class="col-auto">
+                                <button class="btn btn-primary move-btn" onclick="move('y_minus')" title="Move Y-">
+                                    Y- <i class="bi bi-arrow-down"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-center">
+                             <div class="col-auto">
+                                 <button class="btn btn-secondary z-btn" onclick="move('z_plus')" title="Move Z+">
+                                    <i class="bi bi-arrow-up"></i> Z+
+                                </button>
+                             </div>
+                             <div class="col-auto">
+                                 <button class="btn btn-secondary z-btn" onclick="move('z_minus')" title="Move Z-">
+                                    Z- <i class="bi bi-arrow-down"></i>
+                                 </button>
+                             </div>
+                        </div>
+
+                    </div> </div> </div> <div class="card mb-4">
+                <div class="card-header">Current Position</div>
+                <div class="card-body fw-bold" id="positionDisplay">
+                    <span class="text-muted fst-italic">Loading...</span>
+                </div>
+            </div> <div class="card mb-4">
+                <div class="card-header">Save Location</div>
+                <div class="card-body">
+                    <form onsubmit="saveLocation(event)">
+                        <div class="mb-3">
+                            <label for="locationName" class="form-label">Location Name</label>
+                            <input type="text" id="locationName" class="form-control" required placeholder="Enter a unique name">
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save"></i> Save Current Location
+                        </button>
+                    </form>
+                </div>
+            </div> <div class="card">
+                <div class="card-header">Saved Locations</div>
+                <div class="card-body">
+                    <div id="locationsListContainer">
+                        {% if locations %}
+                            <ul class="list-group">
+                            {% for name, pos in locations.items() %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <strong>{{ name }}</strong>: X={{ pos.x | round(2) }}, Y={{ pos.y | round(2) }}, Z={{ pos.z | round(2) }}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <div class="text-muted">No locations saved yet.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div> </div> </div> </div> <script>
+    // --- Configuration ---
+    const POSITION_POLL_INTERVAL_MS = 3000; // Poll every 3 seconds
+    const STATUS_MESSAGE_TIMEOUT_MS = 5000; // Hide status messages after 5 seconds
+
+    // --- Global Variables ---
+    const apiUrls = document.getElementById('robot-control-container').dataset;
+    let statusTimeoutId = null; // Timeout ID for hiding status messages
+    let positionPollIntervalId = null; // Interval ID for polling position
+
+    // --- Core Functions ---
+
+    /** Gets the currently selected step size */
+    function getStep() {
+        const selectedRadio = document.querySelector('input[name="stepSelect"]:checked');
+        return selectedRadio ? parseFloat(selectedRadio.value) : 10.0;
+    }
+
+    /** Generic API fetch helper */
+    async function apiFetch(url, options = {}) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            const response = await fetch(url, { ...options, signal: controller.signal });
+            clearTimeout(timeoutId);
+            const data = await response.json();
+            if (!response.ok) {
+                const error = new Error(data.message || `HTTP error ${response.status}`);
+                error.status = response.status; error.data = data; throw error;
+            }
+            return data;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') { throw new Error("Request timed out."); }
+            if (error instanceof SyntaxError) { throw new Error("Invalid server response."); }
+            console.error(`API Fetch Error (${options.method || 'GET'} ${url}):`, error);
+            throw error;
+        }
+    }
+
+    /** Sends a move command */
+    function move(direction) {
+        stopPositionPolling();
+        updateStatus({ status: 'info', message: `Moving ${direction}...` });
+        apiFetch(apiUrls.apiMoveUrl, {
+            method: "POST",
+            body: new URLSearchParams({ direction: direction, step: getStep() }),
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        })
+        .then(data => { updateStatus(data); getPosition(); })
+        .catch(error => updateStatus({ status: "error", message: `Move failed: ${error.message}` }))
+        .finally(startPositionPolling);
+    }
+
+    /** Sends a home command */
+    function home() {
+        stopPositionPolling();
+        updateStatus({ status: 'info', message: 'Homing...' });
+        apiFetch(apiUrls.apiHomeUrl, { method: "POST" })
+            .then(data => { updateStatus(data); getPosition(); })
+            .catch(error => updateStatus({ status: "error", message: `Home failed: ${error.message}` }))
+            .finally(startPositionPolling);
+    }
+
+    /** Fetches and updates the current position display */
+    function getPosition() {
+        const displayEl = document.getElementById("positionDisplay");
+        if (!displayEl) return;
+        apiFetch(apiUrls.apiGetPositionUrl)
+            .then(data => {
+                const pos = data.position || {};
+                if (data.status === "ok" && pos.x !== undefined) {
+                    displayEl.innerHTML = `<strong>X:</strong> ${pos.x.toFixed(2)} | <strong>Y:</strong> ${pos.y.toFixed(2)} | <strong>Z:</strong> ${pos.z.toFixed(2)}`;
+                    displayEl.className = 'card-body fw-bold text-success';
                 } else {
-                    stepBtnInactiveClasses.forEach(cls => btn.classList.add(cls));
+                    displayEl.innerHTML = `<span class="text-muted">Unavailable (${data.message || 'N/A'})</span>`;
+                    displayEl.className = 'card-body fw-bold text-warning';
                 }
+            })
+            .catch(error => {
+                console.warn('Poll Position Error:', error.message);
+                displayEl.innerHTML = `<span class="text-danger">Error fetching position</span>`;
+                displayEl.className = 'card-body fw-bold text-danger';
             });
+    }
+
+    /** Saves the current location */
+    function saveLocation(event) {
+        event.preventDefault();
+        const nameInput = document.getElementById("locationName");
+        const name = nameInput.value.trim();
+        if (!name) { updateStatus({ status: 'warning', message: 'Location name required.' }); nameInput.focus(); return; }
+        stopPositionPolling();
+        updateStatus({ status: 'info', message: `Saving '${name}'...` });
+        apiFetch(apiUrls.apiSaveLocationUrl, {
+            method: "POST", body: new URLSearchParams({ name }),
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        })
+        .then(data => {
+            updateStatus(data);
+            if (data.status === "ok" && data.locations) { updateLocationsList(data.locations); nameInput.value = ''; }
+        })
+        .catch(error => updateStatus({ status: "error", message: `Save failed: ${error.message}` }))
+        .finally(startPositionPolling);
+    }
+
+   /** Updates the status message area */
+    function updateStatus(response) {
+        const statusArea = document.getElementById('statusMessageArea');
+        if (!statusArea) { console.error("Status area not found!"); return; }
+        clearTimeout(statusTimeoutId);
+        if (response && response.message) {
+            console.log("Status:", response);
+            statusArea.textContent = response.message;
+            const alertClasses = { ok: 'alert-success', error: 'alert-danger', warning: 'alert-warning', info: 'alert-info' };
+            statusArea.className = 'alert'; // Reset
+            statusArea.classList.add(alertClasses[response.status] || 'alert-info', 'status-visible');
+            statusArea.classList.remove('status-hidden');
+            statusTimeoutId = setTimeout(() => {
+                statusArea.classList.remove('status-visible'); statusArea.classList.add('status-hidden');
+            }, STATUS_MESSAGE_TIMEOUT_MS);
+        } else {
+            statusArea.classList.remove('status-visible'); statusArea.classList.add('status-hidden'); statusArea.textContent = '';
         }
-        // --- End Restored Functions ---
+    }
 
-
-        // --- Event Listeners ---
-        function attachListeners() {
-            console.log("Attempting to attach listeners..."); // DEBUG
-
-            const arrowButtons = document.querySelectorAll('.btn-arrow');
-            console.log(`Found ${arrowButtons.length} arrow buttons.`); // DEBUG
-            arrowButtons.forEach(button => {
-                 button.addEventListener('click', () => {
-                     console.log("Arrow button clicked:", button.id); // DEBUG
-                     const direction = button.getAttribute('data-direction');
-                     const step = currentJogStep;
-                     if (!direction) { console.log("No direction found for button:", button.id); return; }
-                     updateStatus(`Sending move: ${direction} by ${step}mm...`);
-                     const formData = new FormData();
-                     formData.append('direction', direction);
-                     formData.append('step', step);
-                     sendPostRequest('/move', formData); // Calls the actual function now
-                 });
-             });
-
-            if (homeButton) {
-                console.log("Attaching listener to Home button."); // DEBUG
-                homeButton.addEventListener('click', () => {
-                     console.log("Home button clicked"); // DEBUG
-                     updateStatus('Sending Home command...');
-                     sendPostRequest('/home', new FormData()); // Calls the actual function now
-                 });
-            } else { console.error("Home button not found!"); }
-
-            if (saveLocationButton) {
-                console.log("Attaching listener to Save Location button."); // DEBUG
-                saveLocationButton.addEventListener('click', () => {
-                     console.log("Save Location button clicked"); // DEBUG
-                     const name = locationNameInput ? locationNameInput.value.trim() : '';
-                     if (!name) { updateStatus('Please enter a location name.', true); return; }
-                     updateStatus(`Saving current location as '${name}'...`);
-                     const formData = new FormData();
-                     formData.append('name', name);
-                     sendPostRequest('/save_location', formData); // Calls the actual function now
-                 });
-            } else { console.error("Save Location button not found!"); }
-
-            if (stepButtonsContainer) {
-                 console.log("Attaching listeners to Step buttons."); // DEBUG
-                 stepButtonsContainer.querySelectorAll('button[data-step]').forEach(button => {
-                     button.addEventListener('click', () => {
-                         currentJogStep = parseFloat(button.getAttribute('data-step'));
-                         console.log("Step button clicked. Selected step:", currentJogStep); // DEBUG
-                         updateStepButtons(); // Calls the actual function now
-                     });
-                 });
-             } else { console.error("Step buttons container not found!"); }
+    /** Updates the saved locations list */
+    function updateLocationsList(locations) {
+        const listContainer = document.getElementById('locationsListContainer');
+        if (!listContainer) return;
+        listContainer.innerHTML = '';
+        if (locations && Object.keys(locations).length > 0) {
+            const ul = document.createElement('ul'); ul.className = 'list-group';
+            const sortedNames = Object.keys(locations).sort((a, b) => a.localeCompare(b));
+            sortedNames.forEach(name => {
+                const pos = locations[name]; const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `<span><strong>${name}</strong>: X=${pos.x.toFixed(2)}, Y=${pos.y.toFixed(2)}, Z=${pos.z.toFixed(2)}</span>`;
+                ul.appendChild(li);
+            });
+            listContainer.appendChild(ul);
+        } else {
+            listContainer.innerHTML = '<div class="text-muted">No locations saved yet.</div>';
         }
+    }
 
+    /** Starts position polling */
+    function startPositionPolling() {
+        stopPositionPolling(); // Clear previous interval
+        console.log(`Starting position polling every ${POSITION_POLL_INTERVAL_MS}ms`);
+        getPosition(); // Initial call
+        positionPollIntervalId = setInterval(getPosition, POSITION_POLL_INTERVAL_MS);
+    }
 
-        // --- Position Polling ---
-        let positionInterval;
-        // --- Restored Function ---
-        async function fetchPosition() {
-             if (!currentPositionEl) { console.error("Position display element not found!"); return; }
-             try {
-                 const response = await fetch('/get_position');
-                 let data;
-                 if (!response.ok) {
-                      try { data = await response.json(); updateStatus(data.message || `Error fetching position: ${response.status}`, true); }
-                      catch { updateStatus(`Error fetching position: ${response.status}`, true); }
-                      return;
-                 }
-                 data = await response.json();
-                 if (data.status === 'ok' && data.position) {
-                     const pos = data.position;
-                     const x = pos.x !== null ? pos.x.toFixed(2) : '---';
-                     const y = pos.y !== null ? pos.y.toFixed(2) : '---';
-                     const z = pos.z !== null ? pos.z.toFixed(2) : '---';
-                     currentPositionEl.textContent = `Position: X:${x} Y:${y} Z:${z}`;
-                     if (!statusMessageEl.classList.contains('text-red-700')) { /* Optional: clear status */ }
-                 } else if (data.status === 'warning') {
-                     const pos = data.position;
-                     const x = pos.x !== null ? pos.x.toFixed(2) : '---';
-                     const y = pos.y !== null ? pos.y.toFixed(2) : '---';
-                     const z = pos.z !== null ? pos.z.toFixed(2) : '---';
-                     currentPositionEl.textContent = `Position: X:${x} Y:${y} Z:${z}`;
-                     updateStatus(data.message || 'Warning fetching position.', false);
-                 }
-             } catch (error) {
-                 console.error('Position Fetch Error:', error);
-                 updateStatus(`Network error fetching position: ${error}`, true);
-             }
-         }
-        // --- End Restored Function ---
+    /** Stops position polling */
+    function stopPositionPolling() {
+        if (positionPollIntervalId) {
+            console.log("Stopping position polling.");
+            clearInterval(positionPollIntervalId);
+            positionPollIntervalId = null;
+        }
+    }
 
-        // Start polling and set initial state when the page loads
-        document.addEventListener('DOMContentLoaded', () => {
-             console.log("DOM Loaded, attaching listeners and starting polling."); // DEBUG
-             // Ensure elements exist before using them
-             if (statusMessageEl && currentPositionEl && locationNameInput && stepButtonsContainer && homeButton && saveLocationButton) {
-                 attachListeners(); // Attach listeners after confirming elements
-                 updateStatus('Interface loaded. Fetching initial position...');
-                 fetchPosition();
-                 positionInterval = setInterval(fetchPosition, 2000);
-                 updateStepButtons(); // Set initial active step button style
-             } else {
-                 console.error("One or more essential elements not found on DOMContentLoaded!");
-                 updateStatus("Initialization Error: UI elements missing.", true);
-             }
-         });
+    // --- Initial Load ---
+    window.onload = () => {
+        console.log("Robot control interface loaded.");
+        startPositionPolling();
+    };
 
-    </script>
+</script>
+{% endblock %}
+
+{% if not base_exists %}
 </body>
 </html>
+{% endif %}
