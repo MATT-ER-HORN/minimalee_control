@@ -178,15 +178,7 @@ class Robot:
         # else:
         #      print("Warning: Communicator object missing '_clear_queue'. Queue not cleared.")
 
-        # --- Send M114 command WITHOUT waiting for 'ok' in send_command ---
-        # Modification needed here: You need a way to tell send_command NOT to wait.
-        # This might involve:
-        # 1. Adding a `wait=False` argument to send_command:
-        #    success = self.comms.send_command("get_position", wait=False)
-        # 2. Or, defining a different command in COMMANDS specifically for M114
-        #    that has "wait_after": False. Let's assume option 1 for this example.
-        # 3. Or, directly using the handler's lower-level send method if available.
-        #    e.g., self.comms.send("M114")
+
 
         # Using placeholder for the non-waiting send:
         if not self.comms.send_command("get_position", wait=False): # *** MODIFICATION POINT ***
@@ -277,6 +269,7 @@ class Robot:
 
     def move_xy(self, x: float, y: float, speed: float | None = None) -> bool:
         """Moves only the X and Y axes to the specified coordinates."""
+        print(x,y,speed)
         target_speed = self._get_speed(speed); print(f"\n[{time.strftime('%H:%M:%S')}] Moving XY to ({x:.3f}, {y:.3f}) at speed {target_speed or 'default'}")
         success = self.comms.send_command("move", X=x, Y=y, F=target_speed)
         if success: self.current_pos['x'] = x; self.current_pos['y'] = y; # Optimistic update

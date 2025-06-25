@@ -181,119 +181,153 @@
     /** Generic API fetch helper */
     async function apiFetch(url, options = {}) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout for fetch
 
         try {
             const response = await fetch(url, { ...options, signal: controller.signal });
-            clearTimeout(timeoutId);
-            const data = await response.json();
+            clearTimeout(timeoutId); // Clear the timeout as fetch completed
+            const data = await response.json(); // Attempt to parse JSON
             if (!response.ok) {
+                // If response not OK, create an error with message from JSON if available
                 const error = new Error(data.message || `HTTP error ${response.status}`);
-                error.status = response.status; error.data = data; throw error;
+                error.status = response.status; error.data = data; // Attach status and data to error
+                throw error;
             }
-            return data;
+            return data; // Return successful JSON data
         } catch (error) {
-            clearTimeout(timeoutId);
-            if (error.name === 'AbortError') { throw new Error("Request timed out."); }
-            if (error instanceof SyntaxError) { throw new Error("Invalid server response."); }
+            clearTimeout(timeoutId); // Ensure timeout is cleared on error too
+            if (error.name === 'AbortError') { // Handle fetch timeout specifically
+                console.error(`API Fetch Error (${options.method || 'GET'} ${url}): Request timed out.`);
+                throw new Error("Request timed out. The robot might be busy or disconnected.");
+            }
+            if (error instanceof SyntaxError) { // Handle cases where response isn't valid JSON
+                console.error("Failed to parse JSON response from:", url, error);
+                throw new Error("Received an invalid response from the server.");
+            }
+            // Log other errors (network issues, errors thrown from !response.ok)
             console.error(`API Fetch Error (${options.method || 'GET'} ${url}):`, error);
-            throw error;
+            throw error; // Re-throw the error
         }
     }
 
     /** Sends a move command */
     function move(direction) {
-        stopPositionPolling();
+        stopPositionPolling(); // Pause polling during action
         updateStatus({ status: 'info', message: `Moving ${direction}...` });
         apiFetch(apiUrls.apiMoveUrl, {
             method: "POST",
             body: new URLSearchParams({ direction: direction, step: getStep() }),
             headers: { "Content-Type": "application/x-www-form-urlencoded" }
         })
-        .then(data => { updateStatus(data); getPosition(); })
+        .then(data => { updateStatus(data); getPosition(); }) // Update status and get new position
         .catch(error => updateStatus({ status: "error", message: `Move failed: ${error.message}` }))
-        .finally(startPositionPolling);
+        .finally(startPositionPolling); // Resume polling after action completes
     }
 
     /** Sends a home command */
     function home() {
-        stopPositionPolling();
+        stopPositionPolling(); // Pause polling
         updateStatus({ status: 'info', message: 'Homing...' });
         apiFetch(apiUrls.apiHomeUrl, { method: "POST" })
-            .then(data => { updateStatus(data); getPosition(); })
+            .then(data => { updateStatus(data); getPosition(); }) // Update status and get new position
             .catch(error => updateStatus({ status: "error", message: `Home failed: ${error.message}` }))
-            .finally(startPositionPolling);
+            .finally(startPositionPolling); // Resume polling
     }
 
     /** Fetches and updates the current position display */
     function getPosition() {
         const displayEl = document.getElementById("positionDisplay");
-        if (!displayEl) return;
+        if (!displayEl) {
+            console.error("Position display element not found!");
+            return;
+        }
+        // Do not make a new request if the document is hidden (polling is paused by visibility handler)
+        if (document.hidden) {
+            // console.log("Document hidden, skipping getPosition poll.");
+            return;
+        }
+
         apiFetch(apiUrls.apiGetPositionUrl)
             .then(data => {
                 const pos = data.position || {};
-                if (data.status === "ok" && pos.x !== undefined) {
+                if (data.status === "ok" && pos.x !== undefined && pos.y !== undefined && pos.z !== undefined) {
                     displayEl.innerHTML = `<strong>X:</strong> ${pos.x.toFixed(2)} | <strong>Y:</strong> ${pos.y.toFixed(2)} | <strong>Z:</strong> ${pos.z.toFixed(2)}`;
-                    displayEl.className = 'card-body fw-bold text-success';
+                    displayEl.className = 'card-body fw-bold text-success'; // Reset classes and set success
                 } else {
                     displayEl.innerHTML = `<span class="text-muted">Unavailable (${data.message || 'N/A'})</span>`;
-                    displayEl.className = 'card-body fw-bold text-warning';
+                    displayEl.className = 'card-body fw-bold text-warning'; // Reset classes and set warning
                 }
             })
             .catch(error => {
+                // Log as warning during polling to be less intrusive
                 console.warn('Poll Position Error:', error.message);
                 displayEl.innerHTML = `<span class="text-danger">Error fetching position</span>`;
-                displayEl.className = 'card-body fw-bold text-danger';
+                displayEl.className = 'card-body fw-bold text-danger'; // Reset classes and set danger
             });
     }
 
     /** Saves the current location */
     function saveLocation(event) {
-        event.preventDefault();
+        event.preventDefault(); // Prevent default form submission
         const nameInput = document.getElementById("locationName");
         const name = nameInput.value.trim();
-        if (!name) { updateStatus({ status: 'warning', message: 'Location name required.' }); nameInput.focus(); return; }
-        stopPositionPolling();
+        if (!name) {
+            updateStatus({ status: 'warning', message: 'Location name required.' });
+            nameInput.focus(); // Set focus back to the input
+            return;
+        }
+        stopPositionPolling(); // Pause polling
         updateStatus({ status: 'info', message: `Saving '${name}'...` });
         apiFetch(apiUrls.apiSaveLocationUrl, {
             method: "POST", body: new URLSearchParams({ name }),
             headers: { "Content-Type": "application/x-www-form-urlencoded" }
         })
         .then(data => {
-            updateStatus(data);
-            if (data.status === "ok" && data.locations) { updateLocationsList(data.locations); nameInput.value = ''; }
+            updateStatus(data); // Show success/error message
+            if (data.status === "ok" && data.locations) {
+                updateLocationsList(data.locations); // Update list
+                nameInput.value = ''; // Clear input
+            }
         })
         .catch(error => updateStatus({ status: "error", message: `Save failed: ${error.message}` }))
-        .finally(startPositionPolling);
+        .finally(startPositionPolling); // Resume polling
     }
 
    /** Updates the status message area */
     function updateStatus(response) {
         const statusArea = document.getElementById('statusMessageArea');
         if (!statusArea) { console.error("Status area not found!"); return; }
-        clearTimeout(statusTimeoutId);
+        clearTimeout(statusTimeoutId); // Clear any existing timeout
         if (response && response.message) {
-            console.log("Status:", response);
+            console.log("Status:", response); // For debugging
             statusArea.textContent = response.message;
+            // Define alert classes for styling
             const alertClasses = { ok: 'alert-success', error: 'alert-danger', warning: 'alert-warning', info: 'alert-info' };
-            statusArea.className = 'alert'; // Reset
+            statusArea.className = 'alert'; // Reset to base class
+            // Add specific status class and make visible
             statusArea.classList.add(alertClasses[response.status] || 'alert-info', 'status-visible');
             statusArea.classList.remove('status-hidden');
+            // Set timeout to hide the message
             statusTimeoutId = setTimeout(() => {
-                statusArea.classList.remove('status-visible'); statusArea.classList.add('status-hidden');
+                statusArea.classList.remove('status-visible');
+                statusArea.classList.add('status-hidden');
             }, STATUS_MESSAGE_TIMEOUT_MS);
         } else {
-            statusArea.classList.remove('status-visible'); statusArea.classList.add('status-hidden'); statusArea.textContent = '';
+            // If no message, ensure area is hidden
+            statusArea.classList.remove('status-visible');
+            statusArea.classList.add('status-hidden');
+            statusArea.textContent = '';
         }
     }
 
     /** Updates the saved locations list */
     function updateLocationsList(locations) {
         const listContainer = document.getElementById('locationsListContainer');
-        if (!listContainer) return;
-        listContainer.innerHTML = '';
+        if (!listContainer) { console.error("Locations list container not found!"); return; }
+        listContainer.innerHTML = ''; // Clear existing list
         if (locations && Object.keys(locations).length > 0) {
             const ul = document.createElement('ul'); ul.className = 'list-group';
+            // Sort names alphabetically for consistent display
             const sortedNames = Object.keys(locations).sort((a, b) => a.localeCompare(b));
             sortedNames.forEach(name => {
                 const pos = locations[name]; const li = document.createElement('li');
@@ -303,13 +337,18 @@
             });
             listContainer.appendChild(ul);
         } else {
+            // Display message if no locations are saved
             listContainer.innerHTML = '<div class="text-muted">No locations saved yet.</div>';
         }
     }
 
     /** Starts position polling */
     function startPositionPolling() {
-        stopPositionPolling(); // Clear previous interval
+        // Ensure polling doesn't start if already running or if page is hidden
+        if (positionPollIntervalId !== null || document.hidden) {
+            return;
+        }
+        stopPositionPolling(); // Clear any lingering interval just in case
         console.log(`Starting position polling every ${POSITION_POLL_INTERVAL_MS}ms`);
         getPosition(); // Initial call
         positionPollIntervalId = setInterval(getPosition, POSITION_POLL_INTERVAL_MS);
@@ -324,10 +363,26 @@
         }
     }
 
-    // --- Initial Load ---
+    /** Handles page visibility changes to pause/resume polling. */
+    function handleVisibilityChange() {
+        if (document.hidden) {
+            stopPositionPolling(); // Pause polling when page is not visible
+        } else {
+            startPositionPolling(); // Resume polling when page becomes visible
+        }
+    }
+
+    // --- Initial Load & Event Listeners ---
     window.onload = () => {
         console.log("Robot control interface loaded.");
-        startPositionPolling();
+        // Start polling only if the page is currently visible
+        if (!document.hidden) {
+            startPositionPolling();
+        }
+        // Add event listener for page visibility changes
+        document.addEventListener('visibilitychange', handleVisibilityChange, false);
+        // Add event listener to stop polling when the page is about to be unloaded
+        window.addEventListener('beforeunload', stopPositionPolling);
     };
 
 </script>

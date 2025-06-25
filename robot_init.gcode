@@ -2,14 +2,14 @@
 ; Sent upon connection by the Python script
 
 ; set StallGuard threshold values for sensorless homing
-M914 X70 Y70 Z100 
+M914 X85 Y85 Z100 
 
 
 ; Steps per unit
 M92 X80.00 Y80.00 Z400.00 E345.00
 
 ; Max feedrates (units/s)
-M203 X500.00 Y500.00 Z15.00 E25.00
+M203 X8000.00 Y8000.00 Z1000.00 E25.00
 
 ; Max Acceleration (units/s^2)
 M201 X500.00 Y500.00 Z100.00 E1000.00

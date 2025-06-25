@@ -134,3 +134,157 @@
 2025-05-09 11:13:01 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 50.0})
 2025-05-09 11:13:01 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 5.0})
 2025-05-09 11:13:01 - No cleanup steps
+2025-05-12 22:04:11 - No prep steps
+2025-05-12 22:04:11 - Executing untitled experiment: 1/2
+2025-05-12 22:04:11 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-05-12 22:04:13 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 2.0})
+2025-05-12 22:04:13 - Executing untitled experiment: 2/2
+2025-05-12 22:04:13 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-05-12 22:04:18 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 2.0})
+2025-05-12 22:04:18 - No cleanup steps
+2025-05-13 10:30:45 - Executing prep steps
+2025-05-13 10:30:45 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-05-13 10:31:10 - Executing untitled experiment: 1/1
+2025-05-13 10:31:10 - Executing: deck.robot.move_to_location(**{'name': 'wash2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 10:31:25 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 40.0})
+2025-05-13 10:31:31 - Executing: deck.robot.move_to_location(**{'name': 'sonicator2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 10:31:31 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 3.0})
+2025-05-13 10:31:35 - No cleanup steps
+2025-05-13 10:33:10 - Executing prep steps
+2025-05-13 10:33:10 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-05-13 10:33:35 - Executing untitled experiment: 1/1
+2025-05-13 10:33:35 - Executing: deck.robot.move_to_location(**{'name': 'wash2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 10:33:51 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 40.0})
+2025-05-13 10:33:57 - Executing: deck.robot.move_to_location(**{'name': 'Sonicate 2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 10:33:57 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 3.0})
+2025-05-13 10:34:01 - No cleanup steps
+2025-05-13 10:34:30 - No prep steps
+2025-05-13 10:34:30 - Executing untitled experiment: 1/1
+2025-05-13 10:34:30 - Executing: deck.robot.move_to_location(**{'name': 'wash2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 10:34:36 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 40.0})
+2025-05-13 10:34:43 - Executing: deck.robot.move_to_location(**{'name': 'Sonicate 2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 10:34:43 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 3.0})
+2025-05-13 10:34:46 - No cleanup steps
+2025-05-13 10:35:40 - No prep steps
+2025-05-13 10:35:40 - Executing untitled experiment: 1/1
+2025-05-13 10:35:40 - Executing: deck.robot.move_to_location(**{'name': 'wash2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 10:35:46 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 40.0})
+2025-05-13 10:35:52 - Executing: deck.robot.move_to_location(**{'name': 'sonicate 2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 10:36:07 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 3.0})
+2025-05-13 10:36:11 - No cleanup steps
+2025-05-13 10:37:58 - No prep steps
+2025-05-13 10:37:58 - Executing untitled experiment: 1/1
+2025-05-13 10:37:58 - Executing: deck.robot.move_to_location(**{'name': 'wash2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 10:38:08 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 40.0})
+2025-05-13 10:38:14 - Executing: deck.robot.move_to_location(**{'name': 'sonicate 2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 10:38:28 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 3.0})
+2025-05-13 10:38:33 - No cleanup steps
+2025-05-13 10:42:26 - No prep steps
+2025-05-13 10:42:26 - Executing untitled experiment: 1/1
+2025-05-13 10:42:26 - Executing: deck.robot.move_to_location(**{'name': 'wash2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 10:42:35 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 40.0})
+2025-05-13 10:42:41 - Executing: deck.robot.move_to_location(**{'name': 'sonicate 2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 10:42:55 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 3.0})
+2025-05-13 10:43:00 - No cleanup steps
+2025-05-13 12:42:15 - No prep steps
+2025-05-13 12:42:15 - Executing untitled experiment: 1/1
+2025-05-13 12:42:15 - Executing: deck.robot.move_to_location(**{'name': 'wash2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 12:42:27 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 40.0})
+2025-05-13 12:42:33 - Executing: deck.robot.move_to_location(**{'name': 'sonicate 2', 'speed': '', 'z_offset': 0.0})
+2025-05-13 12:42:47 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 3.0})
+2025-05-13 12:42:52 - No cleanup steps
+2025-05-13 12:48:37 - No prep steps
+2025-05-13 12:48:37 - Executing untitled experiment: 1/6
+2025-05-13 12:48:37 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:48:37 - Executing untitled experiment: 2/6
+2025-05-13 12:48:37 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:48:42 - Executing untitled experiment: 3/6
+2025-05-13 12:48:42 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:48:47 - Executing untitled experiment: 4/6
+2025-05-13 12:48:47 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:48:52 - Executing untitled experiment: 5/6
+2025-05-13 12:48:52 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:48:58 - Executing untitled experiment: 6/6
+2025-05-13 12:48:58 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:49:03 - No cleanup steps
+2025-05-13 12:49:29 - No prep steps
+2025-05-13 12:49:29 - Executing untitled experiment: 1/1
+2025-05-13 12:49:29 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:49:29 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:49:34 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:49:39 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:49:44 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:49:59 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:49:59 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:50:04 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:50:09 - No cleanup steps
+2025-05-13 12:51:01 - No prep steps
+2025-05-13 12:51:01 - Executing untitled experiment: 1/1
+2025-05-13 12:51:01 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:51:01 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:51:06 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:51:11 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:51:17 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:51:22 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:51:27 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:51:32 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 60.0})
+2025-05-13 12:51:37 - No cleanup steps
+2025-05-13 13:14:12 - No prep steps
+2025-05-13 13:14:12 - Executing untitled experiment: 1/1
+2025-05-13 13:14:12 - Executing: deck.robot.move_to_location(**{'name': '1', 'speed': '7000', 'z_offset': 0.0})
+2025-05-13 13:14:18 - Executing: deck.robot.move_to_location(**{'name': '2', 'speed': '7000', 'z_offset': 0.0})
+2025-05-13 13:14:28 - Executing: deck.robot.move_to_location(**{'name': '3', 'speed': '7000', 'z_offset': 0.0})
+2025-05-13 13:14:36 - No cleanup steps
+2025-05-13 13:15:03 - No prep steps
+2025-05-13 13:15:03 - Executing untitled experiment: 1/1
+2025-05-13 13:15:03 - Executing: deck.robot.move_to_location(**{'name': '1', 'speed': '7000', 'z_offset': 0.0})
+2025-05-13 13:15:10 - Executing: deck.robot.move_to_location(**{'name': '2', 'speed': '7000', 'z_offset': 0.0})
+2025-05-13 13:15:19 - Executing: deck.robot.move_to_location(**{'name': '3', 'speed': '10000', 'z_offset': 0.0})
+2025-05-13 13:15:27 - No cleanup steps
+2025-05-13 13:19:03 - No prep steps
+2025-05-13 13:19:03 - Executing robot_movement_demo experiment: 1/2
+2025-05-13 13:19:03 - Executing: deck.robot.move_to_location(**{'name': '1', 'speed': '7000', 'z_offset': 0.0})
+2025-05-13 13:19:09 - Executing: deck.robot.move_to_location(**{'name': '2', 'speed': '7000', 'z_offset': 0.0})
+2025-05-13 13:19:18 - Executing: deck.robot.move_to_location(**{'name': '3', 'speed': '10000', 'z_offset': 0.0})
+2025-05-13 13:19:26 - Executing robot_movement_demo experiment: 2/2
+2025-05-13 13:19:26 - Executing: deck.robot.move_to_location(**{'name': '1', 'speed': '7000', 'z_offset': 0.0})
+2025-05-13 13:19:36 - Executing: deck.robot.move_to_location(**{'name': '2', 'speed': '7000', 'z_offset': 0.0})
+2025-05-13 13:19:46 - Executing: deck.robot.move_to_location(**{'name': '3', 'speed': '10000', 'z_offset': 0.0})
+2025-05-13 13:19:53 - No cleanup steps
+2025-05-13 14:14:32 - Executing prep steps
+2025-05-13 14:14:32 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-05-13 14:14:34 - Executing untitled experiment: 1/9
+2025-05-13 14:14:34 - Executing: deck.robot.move_to_location(**{'name': 'max', 'speed': '', 'z_offset': 0.0})
+2025-05-13 14:14:54 - Executing: deck.robot.move_to_location(**{'name': 'min', 'speed': '', 'z_offset': 0.0})
+2025-05-13 14:15:24 - Executing untitled experiment: 2/9
+2025-05-13 14:15:24 - Executing: deck.robot.move_to_location(**{'name': 'max', 'speed': '', 'z_offset': 0.0})
+2025-05-13 14:15:55 - Executing: deck.robot.move_to_location(**{'name': 'min', 'speed': '', 'z_offset': 0.0})
+2025-05-13 14:16:25 - Executing untitled experiment: 3/9
+2025-05-13 14:16:25 - Executing: deck.robot.move_to_location(**{'name': 'max', 'speed': '', 'z_offset': 0.0})
+2025-05-13 14:16:55 - Executing: deck.robot.move_to_location(**{'name': 'min', 'speed': '', 'z_offset': 0.0})
+2025-05-13 14:17:26 - Executing untitled experiment: 4/9
+2025-05-13 14:17:26 - Executing: deck.robot.move_to_location(**{'name': 'max', 'speed': '', 'z_offset': 0.0})
+2025-05-13 14:17:56 - Stopping execution during script
+2025-05-13 14:17:56 - Stopping execution during untitled: 5/9
+2025-05-13 14:17:56 - No cleanup steps
+2025-05-13 14:17:56 - Stopping execution during cleanup section.
+2025-06-02 15:22:37 - No prep steps
+2025-06-02 15:22:37 - Executing Test experiment: 1/1
+2025-06-02 15:22:37 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-06-02 15:22:44 - Executing: deck.robot.move_to_location(**{'name': 'location for test', 'speed': '', 'z_offset': 0.0})
+2025-06-02 15:22:50 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 40.0})
+2025-06-02 15:22:52 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 1.0})
+2025-06-02 15:22:56 - No cleanup steps
+2025-06-02 15:24:15 - No prep steps
+2025-06-02 15:24:15 - Executing Test experiment: 1/1
+2025-06-02 15:24:15 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-06-02 15:24:23 - Executing: deck.robot.move_to_location(**{'name': 'location for test', 'speed': '', 'z_offset': 0.0})
+2025-06-02 15:24:29 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 40.0})
+2025-06-02 15:24:31 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 1.0})
+2025-06-02 15:24:35 - No cleanup steps
+2025-06-04 11:00:40 - No prep steps
+2025-06-04 11:00:40 - Executing untitled experiment: 1/1
+2025-06-04 11:00:40 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-06-04 11:00:43 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 40.0})
+2025-06-04 11:00:43 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 1.0})
+2025-06-04 11:00:46 - No cleanup steps
