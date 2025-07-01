@@ -288,3 +288,8 @@
 2025-06-04 11:00:43 - Executing: deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 40.0})
 2025-06-04 11:00:43 - Executing: deck.sonicator.run_for_duration(**{'duration_s': 1.0})
 2025-06-04 11:00:46 - No cleanup steps
+2025-06-27 17:39:46 - No prep steps
+2025-06-27 17:39:46 - Executing untitled experiment: 1/1
+2025-06-27 17:39:46 - Executing: deck.robot.home(**{'axes': 'xyz'})
+2025-06-27 17:39:52 - Executing: deck.robot.move_to_location(**{'name': 'marly_test', 'speed': '', 'z_offset': 0.0})
+2025-06-27 17:39:59 - No cleanup steps

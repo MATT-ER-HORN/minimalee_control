@@ -1,9 +1,6 @@
-
-
 """
 Dictionary of commands called with human readable names and their associated GCode command
 """
-
 COMMANDS = {
     # Movement & Setup
     "home_all": {
@@ -14,7 +11,7 @@ COMMANDS = {
         "gcode": "M114",
         "desc": "Report current position",
         "params": [],
-        "wait_after": False, 
+        "wait_after": False,
         "send_m400_before_wait": False
     },
     "move": {
@@ -47,6 +44,21 @@ COMMANDS = {
         "gcode_base": "G1", "desc": "Move extruder (pump)",
         "params": ["E", "F"],
         "wait_after": True, "send_m400_before_wait": True
+    },
+    # Hotplate (Hotbed) Commands
+    "set_bed_temp": {
+        "gcode_base": "M140", "desc": "Set bed temperature",
+        "params": ["S"],
+        "wait_after": False, "send_m400_before_wait": False
+    },
+    "set_bed_temp_wait": {
+        "gcode_base": "M190", "desc": "Set bed temperature and wait",
+        "params": ["S"],
+        "wait_after": True, "send_m400_before_wait": False
+    },
+    "get_temp": {
+        "gcode": "M105", "desc": "Get temperature report", "params": [],
+        "wait_after": False, "send_m400_before_wait": False
     },
     # Sonicator (Fan) Commands
     "fan_on": {

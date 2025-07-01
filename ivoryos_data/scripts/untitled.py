@@ -2,7 +2,6 @@ import Main as deck
 import time
 
 
-def untitled():
-	deck.robot.home(**{'axes': 'xyz'})
-	deck.pump.pump_duration(**{'duration_s': 3.0, 'flowrate_ml_min': 40.0})
-	deck.sonicator.run_for_duration(**{'duration_s': 1.0})
+def untitled_prep():
+	deck.pump.pump_volume(**{'flowrate_ml_min': 40.0, 'volume_ml': 3.0})
+	deck.hotplate.heat_and_wait(**{'target_temp': 80.0, 'timeout_s': 600.0})

@@ -3,7 +3,7 @@ import math
 from comms.wifi_handler import WifiHandler
 from comms.serial_handler import SerialHandler
 
-# Removed: CommunicatorType = Union[WifiHandler, SerialHandler]
+
 
 class Pump:
     """Control the peristaltic pump using the 3d printer extruder (Simplified, Handler Agnostic)."""
